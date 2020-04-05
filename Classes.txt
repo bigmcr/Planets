@@ -1,0 +1,14 @@
+Variable			Planet Slot/Function	Planet Signal					Frame Slot					Frame Signal
+NumberOfPlanets		none					changeNumberOfPlanets(int)		changeNumberOfPlanets(int)	none
+CurrentPlanet		getPlanet(int)			planetChanged(Object, int)		getObject(Object, int)				setObject(int)
+	name
+	position
+	velocity
+	mass
+	color
+scenario			none					reset(int)						reset(int)					none
+systemCentered		none					changeSystemCentered(bool)		setSystemCentered(bool)		none
+trace				none					setTrace(bool)					setTrace(bool)				none
+speed				none					setSpeed(double)				setSpeed(double)			none
+text				setText(QString)		none							none						setText(QString)
+statusReport		none					displayStatus()					statusReport()				none
