@@ -40,7 +40,7 @@ QList<QList<QString> > scalarUnits::simplifyUnits()
 
 bool scalarUnits::unitsEqual(QList<QList<QString> > newUnit) const
 {
-    if ((unit[numerator][0] == "") || (unit[denominator][0] == "")) return true;
+    if ((unit[numerator][0] == "") || (unit[denominator][0] == "")) return false;
     if (newUnit.length() != unit.length()) return false;
     if (newUnit[numerator].length() != unit[numerator].length()) return false;
     if (newUnit[denominator].length() != unit[denominator].length()) return false;
@@ -59,11 +59,18 @@ bool scalarUnits::unitsEqual(QList<QList<QString> > newUnit) const
 long double scalarUnits::round(long double number, int digits)
 {
     long double multiplier = 1;
-    for (int index = 0; index < digits; index ++)
-    {
-        multiplier *= 10;
+    if (digits > 0)
+        for (int index = 0; index < digits; index ++)
+        {
+            multiplier *= 10;
+        }
+    else {
+        for (int index = 0; index > digits; index --)
+        {
+            multiplier /= 10;
+        }
     }
-    return fmodl(number * multiplier, multiplier) / multiplier;
+    return roundl(number * multiplier) / multiplier;
 }
 
 QString toString(scalarUnits scalar)
