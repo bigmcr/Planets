@@ -7,6 +7,7 @@
 #include <qmath.h>
 #include <precision.h>
 #include <tgmath.h>
+#include <physicsconsts.h>
 
 Point3D operator*(Matrix3x3 mat, Point3D v)
 {
@@ -135,9 +136,6 @@ void pictureFrame::paintEvent(QPaintEvent * event)
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     painter.drawRect(-width()/2, -height()/2, width(), height());
-    painter.setPen(Qt::red);
-    painter.setBrush(Qt::red);
-
 
 //    painter->drawText(400, -400, 1000, 1000, 0, "PointerToOptions = " + toString(int(pointerToOptions)));
     paintAxes(&painter);
@@ -371,16 +369,15 @@ void pictureFrame::updateMatrix()
     //     0  0 -1
     if ((options != nullptr) && (options->newtonian2D()))
     {
-        transformMatrix = Matrix3x3::getIdentity(3);
+        transformMatrix = Matrix3x3::getIdentity();
         transformMatrix.setValue(1, 1, -1);
         transformMatrix.setValue(2, 2, -1);
         return;
     }
 
-    transformMatrix = Matrix3x3::getIdentity(3);
+    transformMatrix = Matrix3x3::getIdentity();
     Matrix3x3 varMat;
     long double varAngle;
-    const long double Pi = 3.14159265358979323846L;
     for (int i = 0; i < 3; i++)
     {
         if (i == 0)
@@ -396,7 +393,7 @@ void pictureFrame::updateMatrix()
 
         varMat = Matrix3x3(0);
 
-        if (i == 0)
+        if (i == 0) // X
         {
             varMat.setValue(0, 0, 1);
             varMat.setValue(1, 1, cosine);
@@ -404,7 +401,7 @@ void pictureFrame::updateMatrix()
             varMat.setValue(2, 1, sine);
             varMat.setValue(2, 2, cosine);
         }
-        else if (i == 1)
+        else if (i == 1) // Y
         {
             varMat.setValue(0, 0, cosine);
             varMat.setValue(0, 2, sine);
@@ -412,7 +409,7 @@ void pictureFrame::updateMatrix()
             varMat.setValue(2, 0, -sine);
             varMat.setValue(2, 2, cosine);
         }
-        else
+        else // Z
         {
             varMat.setValue(0, 0, cosine);
             varMat.setValue(0, 1, -sine);
@@ -427,15 +424,15 @@ void pictureFrame::updateMatrix()
 void pictureFrame::paintAxes(QPainter * painter)
 {
     Point3D e[3];
-    e[0] = transform(Point3D(50,0,0));
-    e[1] = transform(Point3D(0,50,0));
-    e[2] = transform(Point3D(0,0,50));
+    e[0] = transform(Point3D(50, 0, 0));
+    e[1] = transform(Point3D( 0,50, 0));
+    e[2] = transform(Point3D( 0, 0,50));
 
     QString axis;
     QColor color;
     for (int i = 0; i < 3; i++)
     {
-        if (i == 0) {axis = "X";color = Qt::red;}
+        if (i == 0) {axis = "X"; color = Qt::red;}
         else if (i == 1) {axis = "Y"; color = Qt::blue;}
         else {axis = "Z"; color = Qt::green;}
         painter->setPen(color);

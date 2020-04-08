@@ -363,7 +363,6 @@ void Planets::close()
 
 void Planets::paintEvent(QPaintEvent * event)
 {
-    paintNumber++;
     if (ui->comboBox->currentText() == "Free Form")
         loadPlanet();
     QPainter painter(this);
@@ -377,12 +376,8 @@ void Planets::paintEvent(QPaintEvent * event)
     ui->mainFrame->setObjects(&objects);
     ui->mainFrame->setTime(systemTime);
     ui->mainFrame->setRemovedObjects(&removedObjects);
-    ui->mainFrame->paintEvent(event);
     painter.drawText(100, 0, 1000, 1000, 0, "B1 = " + toStringP(viewerPlane.getBasis1(),true));
     painter.drawText(100, 100, 1000, 1000, 0, "B1 = " + toStringP(viewerPlane.getBasis2(), true));
-//    painter.drawText(QPointF(-100, -100), "This has been painted " + toString(paintNumber) + " times");
-//    painter.drawText(QPointF(100,-100), "mouseIsRotating = " + toString(mouseIsRotating) +
-//                     "\nmouseIsPanning = " + toString(mouseIsPanning) + " zoomPoint = " + toString(zoomPoint));
     QMainWindow::paintEvent(event);
 }
 

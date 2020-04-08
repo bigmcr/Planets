@@ -86,7 +86,6 @@ private:
     QList <Point3D> gravPoints;  // the list of the points that gravity is displayed at
     QList <Point3D> gravLength;  // the list of lengths of gravity at the points
     QList <QColor> gravColor;    // the color that the gravity should be
-    int paintNumber;             // used to keep track of the number of times the screen has been painted
     long double systemTime;      // the time that the system has been running
     QString data;                // this string holds the data that will be exported to a CSV file for analysis
     Object removedObjects;       // this holds properties of the objects that got too far from the system
