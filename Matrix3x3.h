@@ -12,10 +12,11 @@ class Matrix3x3
 {
     long double array[3][3];
     static const int Error = 12345;
+    static const int size = 3;
 public:
     Matrix3x3(long double initializeValue = 0);
-    int getN() const {return 3;}
-    int getM() const {return 3;}
+    int getN() const {return size;}
+    int getM() const {return size;}
     long double at(int i, int j) const {if (isInM(i) && isInN(j)) return array[i][j]; else return 0;}
     long double operator()(int i, int j) const {return at(i,j);}
     long double setValue(int i, int j, long double value)
@@ -64,7 +65,7 @@ public:
     }
 
     static int getError() {return Error;}
-    static Matrix3x3 getIdentity(int size)
+    static Matrix3x3 getIdentity()
     {
         Matrix3x3 newMat(0);
         for (int i = 0; i < size; i++)

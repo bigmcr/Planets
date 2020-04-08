@@ -1,0 +1,6 @@
+#ifndef PHYSICSCONSTS_H
+#define PHYSICSCONSTS_H
+
+const long double Pi = 3.14159265358979323846L;
+
+#endif // PHYSICSCONSTS_H

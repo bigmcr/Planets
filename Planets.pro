@@ -13,6 +13,7 @@ TEMPLATE = app
 INCLUDEPATH += "D:\Dropbox\QT Programming\Include Files"
 
 SOURCES += main.cpp\
+    Matrix.cpp \
     Planets.cpp \
     pictureframe.cpp \
     Options.cpp \
@@ -23,7 +24,9 @@ SOURCES += main.cpp\
     toString.cpp
 
 HEADERS  += Planets.h \
+    Matrix.h \
     Object.h \
+    physicsconsts.h \
     pictureFrame.h \
     precision.h \
     toString.h \
