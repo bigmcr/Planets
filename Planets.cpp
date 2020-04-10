@@ -376,7 +376,7 @@ void Planets::paintEvent(QPaintEvent * event)
     ui->mainFrame->setObjects(&objects);
     ui->mainFrame->setTime(systemTime);
     ui->mainFrame->setRemovedObjects(&removedObjects);
-    painter.drawText(100, 0, 1000, 1000, 0, "B1 = " + toStringP(viewerPlane.getBasis1(),true));
+    painter.drawText(100,   0, 1000, 1000, 0, "B1 = " + toStringP(viewerPlane.getBasis1(),true));
     painter.drawText(100, 100, 1000, 1000, 0, "B1 = " + toStringP(viewerPlane.getBasis2(), true));
     QMainWindow::paintEvent(event);
 }
@@ -677,7 +677,7 @@ void Planets::calculateSystemMass()
 
 void Planets::calculateSystemMomentum()
 {
-        systemMomentum = Point3D(0, 0, 0);
+    systemMomentum = Point3D(0, 0, 0);
 	for (int i = 0; i < objects.size(); i++)
 		systemMomentum += objects.at(i).getMomentum();
 }
@@ -705,7 +705,7 @@ void Planets::removeObject(int index, bool isTooFar)
 	if (isTooFar)
 	{
 		// add one to the removed objects counter, which is x of the position
-                removedObjects.setPosition(removedObjects.getPosition() + Point3D(1, 0));
+        removedObjects.setPosition(removedObjects.getPosition() + Point3D(1, 0));
 		// add the removed mass to the object
 		removedObjects.setMass(removedObjects.getMass() + objects.at(index).getMass());
 		// add the momuntum together by adding the individual momentums and dividing by the sum of the masses
@@ -844,7 +844,7 @@ Plane Planets::calculateGravityPlane()
         if (options->gravPlaneGoesThroughCenterOfMass()) pt3 = centerOfMass;
     }
     Plane basePlane(pt1, pt2, pt3);
-//    if (options->gravPlaneGoesThroughCenterOfMass() && useCenterOfMass) basePlane.setAddPoint(centerOfMass);
+    if (options->gravPlaneGoesThroughCenterOfMass() && useCenterOfMass) basePlane.setAddPoint(centerOfMass);
     basePlane.setBasisLength(options->arrowSpacing());
 //    debug("Mode = " + toString(mode) + "\nPt1 = " + toString(pt1, true) + "\nPt2 = " +
 //          toString(pt2, true) + "\nPt3 = " + toString(pt3, true));
@@ -922,15 +922,21 @@ void Planets::forward()
         {
             for (int i = 0; i < objects.size(); i++)
             {
+                // if this object's mass is zero, skip it
                 if (objects.at(i).getMass() == 0.0L) continue;
+
+                // cycle through each of the planets
                 for (int j = 0; j < objects.size(); j++)
                 {
+                    // skip calculating the force between this object and this object
                     if (j == i) continue;
-                    long double radius = distance(objects.at(i).getPosition() - objects.at(j%objects.size()).getPosition());
-                    if (radius < qMax(objects.at(i).getRadius(), objects.at(j%objects.size()).getRadius()))
+
+                    // calculate the distance between objects and compare that to their radii to determine if they collided.
+                    long double objectDistance = distance(objects.at(i).getPosition() - objects.at(j%objects.size()).getPosition());
+                    if (objectDistance < qMax(objects.at(i).getRadius(), objects.at(j).getRadius()))
                     {
                         planetsCollide(i, j);
-                        radius = 100000;
+                        objectDistance = 100000;
                         i = 1000;
                         j = 1000;
                         continue;
@@ -947,7 +953,7 @@ void Planets::forward()
                 Point3D accelCurrent;
                 for (int k = 0; k < objects.size(); k++)
                 {
-                    if (k == i || objects.at(k).getMass() == 0.0L) continue;
+                    if (k == i || (objects.at(k).getMass() == 0.0L)) continue;
                     accelCurrent += calculateGravForce(&objects.at(i), &objects.at(k))/objects.at(i).getMass()
                                     * normalize(objects.at(i).getPosition() - objects.at(k).getPosition());
                 }
@@ -968,16 +974,7 @@ void Planets::forward()
         else  // if there is only one object, things are fairly simple
         {
             objects[0].setPosition(objects.at(0).getPosition() + objects.at(0).getVelocity()*dt);
-//          double time = dt;//totalTime + systemTime;
-//          objects[0].setAccel(Point3D(0,10));
-//          objects[0].setVelocity(objects.at(0).getVelocity() + objects.at(0).getAccel()*time);
-//          objects[0].setPosition(objects.at(0).getPosition() + objects.at(0).getVelocity()*time +
-//                                 objects.at(0).getAccel()*time*time/2.0);
-//          if (objects[0].getVelocity().y() > 100.0) timer->stop();
         }
-//          a(t) = a_int
-//          v(t) = v_int + a_int*t
-//          x(t) = x_int+v(t)*t+a(t)/2*t^2
     }
     if (options->displayTrace())
     {
@@ -1002,7 +999,7 @@ void Planets::forward()
 //          removeObject(i--, true);
 //  if (ui->showPlanetStatus->isVisible()) loadPlanet();
     systemTime += totalTime;
-//  if (systemTime >= 100 || objects.size() == 1) timer->stop();
+  if (systemTime >= 100 || objects.size() == 1) timer->stop();
     delete[] nextPositions;
     update();
 }
@@ -1060,7 +1057,6 @@ void Planets::update()
 void Planets::reset()
 {
     zoomPoint = QPoint(0,0);                    // the point that the mouse wheel will zoom into
-    paintNumber = 0;                            // how many times the main screen has been repainted
     systemTime = 0;                             // how long the system has been running
     ui->speedDoubleSpinBox->setValue(1.0);      // the percentage time modifier, to make time go fast or slow
     options->setTrace(true);                    // whether or not to draw the previous positions of the planets
@@ -1339,6 +1335,7 @@ void Planets::mouseReleaseEvent(QMouseEvent *event)
 {
     mouseIsRotating = false;
     mouseIsPanning = false;
+    QWidget::mouseReleaseEvent(event);
 }
 
 void Planets::wheelEvent(QWheelEvent * event)
