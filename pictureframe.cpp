@@ -80,6 +80,7 @@ void pictureFrame::paintPlanet(QPainter * painter)
                                          transform(objects->at(i).getVelocity()),
                                          objects->at(i).getMass(), objects->at(i).getRadius()/static_cast<long double>(distanceScalar),
                                          objects->at(i).getName(), objects->at(i).getColor()));
+//    std::sort(transformedObjects.first(),transformedObjects.last());
     qSort(transformedObjects);
     for (int planet = 0; planet < objects->size(); planet++)
     {
@@ -264,9 +265,9 @@ void pictureFrame::paintGravField(QPainter * painter, QList<Object> * objects)
                     long double A, B, C;
                     findParabolaCoefficients(p1, p2, p3, A, B, C);
                     Point3D newOldPoint = Point3D(x, y, A*y*y + B*y + C);
-                    for (long double newY = y; newY <= y + spacing; newY += 0.1L*spacing)
+                    for (int newY = y*10; newY <= 10*(y + spacing); newY += spacing)
                     {
-                        point1 = Point3D(static_cast<long double>(x), newY, A*newY*newY + B*newY + C);
+                        point1 = Point3D(static_cast<long double>(x), newY/10.0L, A*newY*newY/100.0L + B*newY/10.0L + C);
                         drawLine(painter, transform(point1), transform(newOldPoint));
                         newOldPoint = point1;
                     }
@@ -298,9 +299,9 @@ void pictureFrame::paintGravField(QPainter * painter, QList<Object> * objects)
                     long double A, B, C;
                     findParabolaCoefficients(p1, p2, p3, A, B, C);
                     Point3D newOldPoint = Point3D(x, y, A*x*x + B*x + C);
-                    for (long double newX = x; newX <= x + spacing; newX += 0.1L*spacing)
+                    for (int newX = 10*x; newX <= 10*(x + spacing); newX += spacing)
                     {
-                        point1 = Point3D(newX, y, A*newX*newX + B*newX + C);
+                        point1 = Point3D(newX/10.0L, y, A*newX*newX/100.0L + B*newX/10.0L + C);
                         drawLine(painter, transform(point1), transform(newOldPoint));
                         newOldPoint = point1;
                     }
@@ -424,9 +425,9 @@ void pictureFrame::updateMatrix()
 void pictureFrame::paintAxes(QPainter * painter)
 {
     Point3D e[3];
-    e[0] = transform(Point3D(50, 0, 0));
-    e[1] = transform(Point3D( 0,50, 0));
-    e[2] = transform(Point3D( 0, 0,50));
+    e[0] = transform(Point3D( 25,  0,  0));
+    e[1] = transform(Point3D(  0, 25,  0));
+    e[2] = transform(Point3D(  0,  0, 25));
 
     QString axis;
     QColor color;

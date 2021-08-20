@@ -51,7 +51,6 @@ public:
     Point3D getMomentum() const {return velocity*mass;}
     long double distance(Point3D point) const {return sqrtl(point.x() * point.x() + point.y()*point.y());}
     void shiftTrace(Point3D center) {for (int i = 0; i < trace.size(); i++) trace[i] -= center;}
-
 private:
     Point3D position;
     Point3D velocity;
