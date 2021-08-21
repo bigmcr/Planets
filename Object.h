@@ -22,6 +22,8 @@ public:
         setColor(newColor);
         setAccel(Point3D(0, 0, 0));
         setAccel(Point3D(0, 0, 0));
+        while (x_i.length() < 5) x_i.append(Point3D(0,0,0));
+        while (v_i.length() < 5) v_i.append(Point3D(0,0,0));
     }
     Point3D setPosition(Point3D newPos) {return position = newPos;}
     Point3D setVelocity(Point3D newVel) {return velocity = newVel;}
@@ -47,10 +49,35 @@ public:
     QList<Point3D> getTrace() const {return trace;}
     void clearTrace() {trace.clear();}
 
-    long double getSpeed() const {return sqrtl(velocity.x()*velocity.x() + velocity.y()*velocity.y());}
+    long double getSpeed() const {return sqrtl(velocity.length());}
     Point3D getMomentum() const {return velocity*mass;}
     long double distance(Point3D point) const {return sqrtl(point.x() * point.x() + point.y()*point.y());}
     void shiftTrace(Point3D center) {for (int i = 0; i < trace.size(); i++) trace[i] -= center;}
+    Point3D setVelocity_plus_half(Point3D newV1_2) {return velocity_plus_half = newV1_2;}
+    Point3D setAccel_N_Minus_one(Point3D newAcc_minus_one) {return accel_n_minus_one = newAcc_minus_one;}
+    Point3D setPosition_plus_half(Point3D newPosition_plus_half) {return position_plus_half = newPosition_plus_half;}
+    Point3D setAccel_N_plus_Half(Point3D newAccel_n_plus_half) {return accel_n_plus_half = newAccel_n_plus_half;}
+    Point3D setX_i(int index, Point3D newX_i) {
+        if (x_i.length() < index) return x_i[index] = newX_i;
+        return Point3D(0, 0, 0);
+    }
+    Point3D setV_i(int index, Point3D newV_i) {
+        if (v_i.length() < index) return v_i[index] = newV_i;
+        return Point3D(0, 0, 0);
+    }
+
+    Point3D getVelocity_plus_half() const {return velocity_plus_half;}
+    Point3D getAccel_N_Minus_one() const {return accel_n_minus_one;}
+    Point3D getPosition_plus_half() const {return position_plus_half;}
+    Point3D getAccel_N_plus_Half() const {return accel_n_plus_half;}
+    Point3D getX_i(int index) const {
+        if (x_i.length() < index) return x_i[index];
+        return Point3D(0, 0, 0);
+    }
+    Point3D getV_i(int index) const {
+        if (v_i.length() < index) return v_i[index];
+        return Point3D(0, 0, 0);
+    }
 private:
     Point3D position;
     Point3D velocity;
@@ -61,6 +88,16 @@ private:
     QString name;
     QColor color;
     QList<Point3D> trace;
+
+    // specialty values for Velocity Verlet
+    Point3D velocity_plus_half, accel_n_minus_one;
+
+    // specialty values for Position Verlet
+    Point3D position_plus_half, accel_n_plus_half;
+
+    // specialty values for Yoshida
+    QVector<Point3D> x_i, v_i;
+
 };
 
 #endif // OBJECT_H

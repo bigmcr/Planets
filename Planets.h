@@ -50,6 +50,8 @@ public slots:
 //    void update2DRadioButton();
     void updateViewOption();
 
+    void changeIntegrationType(QString newType);
+
 private:
     void mousePressEvent(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
@@ -97,23 +99,41 @@ private:
     Point3D systemMomentum;      // this is the system momentum. use it to find systemVelocity
     long double systemMass;      // this is all of the mass in the entire system
     static const int time = 25;  // the time in milliseconds between screen updates
+    QString integrationType;     // integration type
+    bool integrationInitialize;  // initialize integration
 
     static constexpr long double G_fake = 0.025L;
     long double G;
 
 //  use these constants when using the solar system realistic model
     static constexpr long double G_real = 6.67e-11L;         // meters^3/(kilograms*seconds^2)
-    static constexpr long double dt = 1/(900000.0L);
+    static constexpr long double G_real_AU_day_M_E = 8.83898E-10;   // Distance - AU, time - days, mass - Earth mass
+    static constexpr long double dt = 1/(100.0L);
 
     Point3D getRandomPoint(long double minRadius = 0, long double maxRadius = 100);
 
+    void calcAccels(int arguments = 0);
+    void Euler();
+    void EulerCromber();
+    void VelocityVerlet();
+    void Yoshida();
+    void Hermite();
+    static Point3D::dataType w_0;
+    static Point3D::dataType w_1;
+    static Point3D::dataType yoshidaC1;
+    static Point3D::dataType yoshidaC4;
+    static Point3D::dataType yoshidaC2;
+    static Point3D::dataType yoshidaC3;
+    static Point3D::dataType yoshidaD1;
+    static Point3D::dataType yoshidaD3;
+    static Point3D::dataType yoshidaD2;
     void calculateSystemProperties();
     void calculateSystemMass();
     void calculateSystemMomentum();
 
     long double calculateEscapeVelocity(Object * planet);
     void setNumberOfPlanets(int number);
-    void planetsCollide(int planet1, int planet2);
+    void planetsCollide();
     long double calculateGravForce(const Object * obj1, const Object * obj2);
     Point3D calculateCenterOfMass();
 

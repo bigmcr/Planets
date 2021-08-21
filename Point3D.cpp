@@ -1,13 +1,12 @@
-#include "Point3D.h"
+#include <Point3D.h>
 #include <QString>
-#include <toString.h>
 
-const Point3D operator*(const Point3D & p, long double factor)
+const Point3D operator*(const Point3D & p, Point3D::dataType factor)
 {
     return Point3D(p.x()*factor, p.y()*factor, p.z()*factor);
 }
 
-const Point3D operator*(long double factor, const Point3D & p)
+const Point3D operator*(Point3D::dataType factor, const Point3D & p)
 {
     return Point3D(p.x()*factor, p.y()*factor, p.z()*factor);
 }
@@ -22,7 +21,7 @@ const Point3D operator-(const Point3D & p1, const Point3D & p2)
     return Point3D(p1.x()-p2.x(), p1.y()-p2.y(), p1.z()-p2.z());
 }
 
-const Point3D operator/(const Point3D & p, long double divisor)
+const Point3D operator/(const Point3D & p, Point3D::dataType divisor)
 {
     return Point3D(p.x()/divisor, p.y()/divisor, p.z()/divisor);
 }
@@ -46,7 +45,7 @@ const Point3D cross(const Point3D p1, const Point3D p2)
                    p1.x()*p2.y() - p1.y()*p2.x());
 }
 
-long double dot(const Point3D p1, const Point3D p2)
+Point3D::dataType dot(const Point3D p1, const Point3D p2)
 {
     return p1.x()*p2.x() + p1.y()*p2.y() + p1.z()*p2.z();
 }
@@ -56,25 +55,30 @@ QString Point3D::toString(bool isHorizontal) const
     QString middle;
     if (isHorizontal) middle = ", ";
     else middle = "\n";
-    return toStringL(xCoord) + middle + toStringL(yCoord) + middle + toStringL(zCoord);
+    return QString::number(double(xCoord)) + middle + QString::number(double(yCoord)) + middle + QString::number(double(zCoord));
 }
 
-Point3D normalize(Point3D point, long double length)
+Point3D normalize(Point3D point, Point3D::dataType length)
 {
-    return point/point.length() * length;
+    return point/Point3D::dataType(point.length()) * length;
 }
 
 Point3D Point3D::round(int digits) const
 {
     if (digits > 10 || digits < 0) return *this;
-    long double multiple = 1;
+    dataType multiple = 1;
     for (int i = 0; i < digits; i++) multiple *= 10;
     return Point3D(int(x()*multiple)/multiple,
                    int(y()*multiple)/multiple,
                    int(z()*multiple)/multiple);
 }
 
-long double distance(Point3D point)
+Point3D::dataType distance(const Point3D point1, const Point3D point2)
 {
-    return point.length();
+    return (point1 - point2).length();
+}
+
+Point3D::dataType distance(const Point3D point1)
+{
+    return point1.length();
 }
