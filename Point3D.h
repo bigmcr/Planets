@@ -21,7 +21,7 @@ public:
         if (zCoord == 0) return fabsl(xCoord*xCoord + yCoord*yCoord);
         if (yCoord == 0) return fabsl(xCoord*xCoord + zCoord*zCoord);
         if (xCoord == 0) return fabsl(yCoord*yCoord + zCoord*zCoord);
-        return  fabsl(xCoord*xCoord + yCoord*yCoord + zCoord*zCoord);
+        return  xCoord*xCoord + yCoord*yCoord + zCoord*zCoord;
     }
     void setX(dataType x) {xCoord = x;}
     void setY(dataType y) {yCoord = y;}
@@ -76,6 +76,9 @@ public:
     }
     bool operator!=(const Point3D p2) const {return ((xCoord != p2.x()) || (yCoord != p2.y()) || (zCoord != p2.z()));}
     bool operator==(const Point3D p2) const {return ((xCoord == p2.x()) && (yCoord == p2.y()) && (zCoord == p2.z()));}
+
+    const Point3D normal() const {dataType len = length(); return Point3D(xCoord/len, yCoord/len, zCoord/len);}
+    const Point3D norm() const {return normal();}
 };
 
 const Point3D operator*(const Point3D & p, Point3D::dataType factor);
@@ -87,7 +90,7 @@ const Point3D operator-(Point3D & p);
 const Point3D operator%(const Point3D p1, const Point3D p2);
 const Point3D cross(const Point3D p1, const Point3D p2);
 Point3D::dataType dot(const Point3D p1, const Point3D p2);
-Point3D normalize(const Point3D point, Point3D::dataType length = 1);
+Point3D normalize(const Point3D point, Point3D::dataType length = 0);
 Point3D::dataType distance(const Point3D point1, const Point3D point2 = Point3D(0,0,0));
 
 #endif // Point3D_H

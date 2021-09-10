@@ -106,13 +106,17 @@ private:
     long double G;
 
 //  use these constants when using the solar system realistic model
-    static constexpr long double G_real = 6.67e-11L;         // meters^3/(kilograms*seconds^2)
-    static constexpr long double G_real_AU_day_M_E = 8.83898E-10;   // Distance - AU, time - days, mass - Earth mass
-    static constexpr long double dt = 1/(100.0L);
+    static constexpr long double G_real_mks = 6.67e-11L;         // meters^3/(kilograms*seconds^2)
+    static constexpr long double G_real_kmks = 6.67e-20L;         // kilometers^3/(kilograms*seconds^2)
+    static constexpr long double G_real_AU_day_M_E = 8.83898E-12;   // AU^3/(earth mass * days^2)      Distance - AU, time - days, mass - Earth mass
+    long double dt = 0.000976562500;
+    long double dt2 = dt*dt;
+    long double dt3 = dt*dt2;
+    long double endTime = 365.25;
 
     Point3D getRandomPoint(long double minRadius = 0, long double maxRadius = 100);
 
-    void calcAccels(int arguments = 0);
+    void calcAccels(int arguments = 0, bool calcJerks = true);
     void Euler();
     void EulerCromber();
     void VelocityVerlet();
@@ -134,7 +138,6 @@ private:
     long double calculateEscapeVelocity(Object * planet);
     void setNumberOfPlanets(int number);
     void planetsCollide();
-    long double calculateGravForce(const Object * obj1, const Object * obj2);
     Point3D calculateCenterOfMass();
 
     QString toStringO(Object planet, bool showEverything = false, bool CSVFormat = false);
@@ -157,6 +160,7 @@ private slots:
     void changeScenario8();
     void changeScenario9();
     void changeScenario0();
+    void on_saveStateButton_clicked();
 };
 
 #endif // PLANETS_H

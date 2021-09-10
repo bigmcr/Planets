@@ -296,7 +296,12 @@ void Options::getGravityPlane(int &mode, int & planet1, int & planet2, int & pla
 // accessor functions for Relativity
 bool Options::newtonian2D() const
 {
-    return ui->newtonian2DRadioButton->isChecked();
+    try {
+        if (ui != 0) return ui->newtonian2DRadioButton->isChecked();
+    }  catch (...) {
+        return true;
+    }
+    return true;
 }
 
 bool Options::newtonian3D() const

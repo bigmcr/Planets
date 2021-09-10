@@ -1,10 +1,11 @@
 #include <toString.h>
 QString toStringD(double number) {
-    return QString::number(number);
+    return QString("%1").arg(number, 0, 'g', 15);
 }
 
 QString toStringL(long double number) {
-    return QString::number(static_cast<double>(number));
+    return QString("%1").arg(number, 0, 'g', 15);
+
 }
 
 QString toStringI(int number) {

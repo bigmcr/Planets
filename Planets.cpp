@@ -5,6 +5,7 @@
 #include <QMouseEvent>
 #include <toString.h>
 #include <QRandomGenerator>
+#include <QDebug>
 
 Point3D::dataType Planets::w_0 = -powl(2.0 , 1/3.0)/(2.0 - powl(2, 1.0/3.0));
 Point3D::dataType Planets::w_1 = 1 / (2.0 - powl(2.0 , 1/3.0));
@@ -506,7 +507,6 @@ void Planets::updateViewOption()
     if (options->deflection()) ui->displayRelativityRadioButton->setChecked(true);
 }
 
-
 void Planets::pause()
 {
     if (timer->isActive())
@@ -527,7 +527,7 @@ void Planets::planetsCollide()
         }
     }
     if (planet1 != -1) {
-//    debug(toString(objects.at(planet1)) + " and planet " + toString(objects.at(planet2)) + " are colliding!");
+        qDebug() << objects.at(planet1).getName() + " and planet " + objects.at(planet2).getName() + " are colliding!";
         if (planet1 > planet2)
         {
             int temp;
@@ -587,14 +587,16 @@ QString Planets::toStringO(Object planet, bool showEverything, bool CSVFormat)
 	}
 	if (CSVFormat)
 	{
-            //data += Name,                     Mass                    Position X,Position Y, Position Z
-            message = planet.getName() + "," + toStringL(planet.getMass()) + "," + toStringP(planet.getPosition(), true) +
-                      //Velocity X, Velocity Y, Velocity Z, Speed
-                      toStringP(planet.getVelocity(), true) + toStringL(distance(planet.getVelocity())) + "," +
-                      //|Momentum|
-                      toStringL(distance(planet.getVelocity()*planet.getMass())) + "," +
-                      //Accel X, Accel Y, Accel Z
-                      toStringP(planet.getAccel(), true);
+        //data += Name,                     Mass                    Position X,Position Y, Position Z
+        message = planet.getName() + "," + toStringL(planet.getMass()) + "," + toStringP(planet.getPosition(), true) +
+                //Velocity X, Velocity Y, Velocity Z, Speed
+                toStringP(planet.getVelocity(), true) + toStringL(distance(planet.getVelocity())) + "," +
+                //|Momentum|
+                toStringL(distance(planet.getVelocity()*planet.getMass())) + "," +
+                //Accel X, Accel Y, Accel Z
+                toStringP(planet.getAccel(), true) +
+                //Jerk X, Jerk Y, Jerk Z
+                toStringP(planet.getJerk(), true);
 	}
 	return message;
 }
@@ -620,34 +622,24 @@ void Planets::setupSolarSystem()
 	//   = 11.172961e-36 * ((meters/1000)/149597870.7)^3 * / (
 
 
-    long double SunMass, SunRadius;
+    long double Sun[4];
     long double Mercury[4], Venus[4], Earth[4], Mars[4];
     long double Jupiter[4], Saturn[4], Uranus[4];
     long double Neptune[4], Pluto[4];
 
 //  planet[0] = Aphelion, planet[1] = Min orbital Velocity, planet[2] = Mass, planet[3] = Radius
-//  these are the values that work fine when G = 0.025 and DISTANCE_SCALAR = 1
-    Earth[0] = 152098232; Earth[1] = 29.29L*299792458L/10.0L/*29.29*/; Earth[2] = 5.9736L*powl(10,24); Earth[3] = 6371L;
-//	Earth[0] = 1.4960E+08; Earth[1] = 2.9780E+01; Earth[2] = 5.9736E+24;
-//	Earth[0] = 4.9901E+02; Earth[1] = 8.5824E-03; Earth[2] = 1;
-    SunMass = Earth[2]*332981.7865L; SunRadius = Earth[3]*109.166535866L;
-    Mercury[0] = Earth[0]*0.38709708L; Mercury[1] = Earth[1]*1.607454668L;
-    Mercury[2] = Earth[2]*0.055279898L; Mercury[3] = Earth[3]*0.382938314L;
-    Venus[0] = Earth[0]*0.723331831L; Venus[1] = Earth[1]*1.175957018L;
-    Venus[2] = Earth[2]*0.815002678L; Venus[3] = Earth[3]*0.949897975L;
-    Mars[0] = Earth[0]*1.523675131L; Mars[1] = Earth[1]*0.808495635L;
-    Mars[2] = Earth[2]*0.10744777L; Mars[3] = Earth[3]*0.533071731L;
-    Jupiter[0] = Earth[0]*5.204253009L; Jupiter[1] = Earth[1]*0.438885158L;
-    Jupiter[2] = Earth[2]*317.8317932L; Jupiter[3] = Earth[3]*11.221472296L;
-    Saturn[0] = Earth[0]*9.581992196L; Saturn[1] = Earth[1]*0.325386165L;
-    Saturn[2] = Earth[2]*95.16204634L; Saturn[3] = Earth[3]*9.459739444L;
-    Uranus[0] = Earth[0]*19.22936178L; Uranus[1] = Earth[1]*0.228676964L;
-    Uranus[2] = Earth[2]*14.53227534L; Uranus[3] = Earth[3]*4.011772092L;
-    Neptune[0] = Earth[0]*30.10358297L; Neptune[1] = Earth[1]*0.182337139L;
-    Neptune[2] = Earth[2]*17.14711397L; Neptune[3] = Earth[3]*3.886987914L;
-    Pluto[0] = Earth[0]*39.48158376L; Pluto[1] = Earth[1]*0.157824043L;
-    Pluto[2] = Earth[2]*0.002184612L; Pluto[3] = Earth[3]*0.180976299L;
-    objects.append(Object(Point3D(0,          0), Point3D(0, 0, 0),          SunMass,    SunRadius,  "Sun",       Qt::yellow));
+    Sun[0] = 0; 	Sun[1] = 0; 	Sun[2] = 1.989E+30; 	Sun[3] = 695700;
+    Mercury[0] = 69816296; 	Mercury[1] = 38.8594842887767; 	Mercury[2] = 3.302E+23; 	Mercury[3] = 2439.7;
+    Venus[0] = 108935007; 	Venus[1] = 34.7866255181453; 	Venus[2] = 4.8685E+24; 	Venus[3] = 6051.8;
+    Earth[0] = 152098320; 	Earth[1] = 29.2911638439679; 	Earth[2] = 5.9742E+24; 	Earth[3] = 6371;
+    Mars[0] = 249230520; 	Mars[1] = 21.9704579543567; 	Mars[2] = 6.4185E+23; 	Mars[3] = 3397;
+    Jupiter[0] = 816642073; 	Jupiter[1] = 12.4323444026568; 	Jupiter[2] = 1.8986E+27; 	Jupiter[3] = 71492;
+    Saturn[0] = 1514524445; 	Saturn[1] = 9.09261129571815; 	Saturn[2] = 5.6846E+26; 	Saturn[3] = 60268;
+    Uranus[0] = 3003731422; 	Uranus[1] = 6.49333381639041; 	Uranus[2] = 8.6832E+25; 	Uranus[3] = 25559;
+    Neptune[0] = 4545854178; 	Neptune[1] = 5.37254836743227; 	Neptune[2] = 1.0243E+26; 	Neptune[3] = 24764;
+    Pluto[0] = 7304204904; 	Pluto[1] = 3.70523124577267; 	Pluto[2] = 1.25E+22; 	Pluto[3] = 1195;
+
+    objects.append(Object(Point3D(Sun[0],     0), Point3D(0, Sun[0]),     Sun[2],     Sun[3],     "Sun",       Qt::yellow));
     objects.append(Object(Point3D(Mercury[0], 0), Point3D(0, Mercury[1]), Mercury[2], Mercury[3], "Mercury",   Qt::red));
     objects.append(Object(Point3D(Venus[0],   0), Point3D(0, Venus[1]),   Venus[2],   Venus[3],   "Venus",     Qt::yellow));
     objects.append(Object(Point3D(Earth[0],   0), Point3D(0, Earth[1]),   Earth[2],   Earth[3],   "Earth",     Qt::cyan));
@@ -751,46 +743,6 @@ void Planets::removeObject(int index, bool isTooFar)
 		ui->planetComboBox->insertItem(i, objects.at(i).getName());
 }
 
-long double Planets::calculateGravForce(const Object * planet1, const Object * planet2)
-{
-    long double radius = distance(planet1->getPosition() - planet2->getPosition());
-	return 0 - G * planet1->getMass() * planet2->getMass()/ (radius * radius);
-}
-/*
-Point3D Planets::calculateForceOnPoint(Point3D point, const int planet)
-{
-	Point3D accelCurrent;
-	for (int k = 0; k < objects.size(); k++)
-	{
-		if (k == planet) continue;
-		accelCurrent += calculateGravForce(&objects.at(planet), &objects.at(k))
-			* normalize(objects.at(planet).getPosition() - objects.at(k).getPosition());
-	}
-	return accelCurrent;
-}
-
-void Planets::calculateNextPosition(const int i)
-{
-//  this calculates position via the PEFRL algorithm
-    Point3D position = objects[i].getPosition();
-    Point3D velocity = objects[i].getVelocity();
-
-    double const_A = 0.1786178958448091;
-    double const_B = -0.2123418310626054;
-    double const_C = -0.066264582669818491;
-	position = position + const_A*dt*velocity;// (38a)
-    velocity = velocity + (1 - 2*const_B)*dt/2.0*calculateForceOnPoint(position, i);// (38b)
-    position = position + const_C*dt*velocity;// (38c)
-    velocity = velocity + const_B*dt*calculateForceOnPoint(position, i);// (38d)
-    position = position + (1 - 2*(const_C + const_A))*dt*velocity;// (PEFRL algorithm) (38e)
-    velocity = velocity + const_B*dt*calculateForceOnPoint(position, i);// (38f)
-    position = position + const_C*dt*velocity;// (38g)
-    velocity = velocity + (1 - 2*const_B)*dt/2.0*calculateForceOnPoint(position, i);// (38h)
-    position = position + const_A*dt*velocity;// (38i)
-    objects[i].setPosition(position);
-    objects[i].setVelocity(velocity);
-}
-*/
 Plane Planets::calculateGravityPlane()
 {
     int checked = 0, planet1, planet2, planet3, mode = 0;
@@ -923,9 +875,8 @@ void Planets::calculateGravityForce(Plane plane)
 void Planets::forward()
 {
     long double totalTime = 0.0L;
-    ui->integrationLabel->setText(integrationType);
     const Point3D systemVelocityAndDT = (! options->systemCentered())*options->systemVelocity() * dt;
-    while (totalTime <= static_cast<long double>(0.005 * ui->speedDoubleSpinBox->value()))
+    while (totalTime < static_cast<long double> (endTime / 1000 * ui->speedDoubleSpinBox->value()) - dt)
     {
         totalTime += dt;
         if (integrationType == "Euler") {Euler();}
@@ -961,32 +912,60 @@ void Planets::forward()
     }
 
     systemTime += totalTime;
-    if (systemTime >= 10 || objects.size() == 1) timer->stop();
+    if (systemTime >= endTime || objects.size() == 1) timer->stop();
     update();
 }
 
-void Planets::calcAccels(int arguments) {
+void Planets::calcAccels(int arguments, bool calcJerk) {
+    long double r2, r3;
+    Point3D r_i_k;
+    Point3D v_i_k;
     // if arguments is zero, that means use the normal position
     if (arguments == 0) {
         for (int i = 0; i < objects.length(); i++) {
-            Point3D accelCurrent;
+            Point3D accelCurrent = Point3D();
+            Point3D jerkCurrent = Point3D();
             for (int k = 0; k < objects.size(); k++)
             {
                 if (k == i || (objects.at(k).getMass() == 0.0L)) continue;
-                accelCurrent += calculateGravForce(&objects.at(i), &objects.at(k))/objects.at(i).getMass()
-                                * normalize(objects.at(i).getPosition() - objects.at(k).getPosition());
+                r_i_k = objects.at(i).getPosition() - objects.at(k).getPosition();
+                v_i_k = objects.at(i).getVelocity() - objects.at(k).getVelocity();
+                r2 = r_i_k.magSqr();
+                r3 = r_i_k.mag() * r2;
+                accelCurrent += 0 - G * objects.at(k).getMass() / r2 * r_i_k.normal();
+                if (calcJerk) {
+                    jerkCurrent += 0 - G * objects.at(k).getMass() / r3 * (v_i_k - 3 * dot(r_i_k, v_i_k)*r_i_k / r2);
+                }
             }
             objects[i].setAccel(accelCurrent);
+            if (calcJerk) objects[i].setJerk(jerkCurrent);
         }
-    // if arguments is non-zero, use the x_i position, where i is the argument
+    } else if (arguments == 5) {
+        for (int i = 0; i < objects.length(); i++) {
+            Point3D accelCurrent;
+            Point3D jerkCurrent;
+            for (int k = 0; k < objects.size(); k++)
+            {
+                if (k == i || (objects.at(k).getMass() == 0.0L)) continue;
+                r_i_k = objects.at(i).getR_P() - objects.at(k).getR_P();
+                v_i_k = objects.at(i).getV_P() - objects.at(k).getV_P();
+                r2 = r_i_k.magSqr();
+                r3 = r_i_k.mag() * r2;
+                accelCurrent += 0 - G * objects.at(k).getMass() / r2 * r_i_k.normal();
+                jerkCurrent  += 0 - G * objects.at(k).getMass() / r3 * (v_i_k - 3 * dot(r_i_k, v_i_k)*r_i_k / r2);
+            }
+            objects[i].setAccel(accelCurrent);
+            if (calcJerk) objects[i].setJerk(jerkCurrent);
+        }
+        // if arguments is non-zero, use the x_i position, where i is the argument
     } else {
         for (int i = 0; i < objects.length(); i++) {
             Point3D accelCurrent;
             for (int k = 0; k < objects.size(); k++)
             {
                 if (k == i || (objects.at(k).getMass() == 0.0L)) continue;
-                accelCurrent += calculateGravForce(&objects.at(i), &objects.at(k))/objects.at(i).getMass()
-                                * normalize(objects.at(i).getX_i(arguments) - objects.at(k).getX_i(arguments));
+                r_i_k = objects.at(i).getX_i(arguments) - objects.at(k).getX_i(arguments);
+                accelCurrent += 0 - G * objects.at(k).getMass() / r_i_k.magSqr() * r_i_k.normal();
             }
             objects[i].setAccel(accelCurrent);
         }
@@ -994,7 +973,7 @@ void Planets::calcAccels(int arguments) {
 }
 
 void Planets::Euler() {
-    calcAccels();
+    calcAccels(0,true);
     for (int i = 0; i < objects.size(); i++)
     {
         objects[i].setPosition((objects.at(i).getPosition() + objects.at(i).getVelocity()*dt));
@@ -1072,17 +1051,30 @@ void Planets::Yoshida() {
 }
 
 void Planets::Hermite() {
+    calcAccels(0, true);
+
+    // these are the predicted values
     for (int i = 0; i < objects.size(); i++)
     {
+        objects[i].setR_P(objects.at(i).getPosition() + objects.at(i).getVelocity() * dt + 1/2.0L*objects.at(i).getAccel() * dt2 + 1/6.0L * objects.at(i).getJerk()*dt3);
+        objects[i].setV_P(objects.at(i).getVelocity() + objects.at(i).getAccel()    * dt + 1/2.0L*objects.at(i).getJerk()  * dt2);
+    }
+
+    calcAccels(5, true);
+
+    // these are the corrected values
+    for (int i = 0; i < objects.size(); i++)
+    {
+        objects[i].setVelocity(objects.at(i).getVelocity() + dt/2.0L * (objects.at(i).getOldAccel() + objects.at(i).getAccel()   ) + dt2/12.0L * (objects.at(i).getOldJerk()  +  objects.at(i).getJerk()));
+        objects[i].setPosition(objects.at(i).getPosition() + dt/2.0L * (objects.at(i).getOldVel()   + objects.at(i).getVelocity()) + dt2/12.0L * (objects.at(i).getOldAccel() + objects.at(i).getAccel()));
     }
 }
 
 Point3D Planets::calculateCenterOfMass()
 {
-        Point3D massPosition = Point3D(0, 0, 0);
+    Point3D massPosition = Point3D(0, 0, 0);
     long double totalMass = 0;
-	for (int i = 0; i < objects.size(); i++)
-	{
+    for (int i = 0; i < objects.size(); i++) {
 		massPosition += objects.at(i).getMass()*objects.at(i).getPosition();
 		totalMass += objects.at(i).getMass();
 	}
@@ -1154,20 +1146,15 @@ void Planets::reset()
 
     QString scenario = ui->comboBox->currentText();
     long double totalMass = 0;
-    if (scenario == "Earth and Sun")
-    {
-        objects.append(Object(      Point3D(              0,        0,      0), Point3D(        0,              0,              0), 333054.2532,    0.004654759, "Sun", Qt::yellow));
-        objects.append(Object(      Point3D(    1.016725701,        0,      0), Point3D(        0,   -2.27231E-12,              0),         1.0,    4.25875E-05, "Earth", Qt::blue));
+    if (scenario == "Earth and Sun") {
+        objects.append(Object(      Point3D(              0,        0,      0), Point3D(        0,              0,              0), 333054.2532,    0.004654793, "Sun", Qt::yellow));
+        objects.append(Object(      Point3D(    1.016725701,        0,      0), Point3D(        0,    0.016916391,              0),         1.0,    4.25875E-05, "Earth", Qt::blue));
         options->setSystemVelocity( Point3D(              0,        0,      0));
-    }
-         else if (scenario == "Binary System")
-    {
-        objects.append(Object(Point3D(-100, 0, 0), Point3D(0, -75, 25), 100, 20, "Sun 1", Qt::yellow));
-        objects.append(Object(Point3D(100, 0, 0), Point3D(0, 75, 25), 100, 20, "Sun 2", Qt::red));
-        options->setSystemVelocity(Point3D(25, 25, 0));
-    }
-    else if (scenario == "Sun and Comets")
-    {// One to ten comets and sun
+    } else if (scenario == "Binary System") {
+        objects.append(Object(Point3D(-100, 0, 0), Point3D(0, -75, 0), 100, 20, "Sun 1", Qt::yellow));
+        objects.append(Object(Point3D(100, 0, 0), Point3D(0, 75, 0), 100, 20, "Sun 2", Qt::red));
+        options->setSystemVelocity(Point3D(0, 0, 0));
+    } else if (scenario == "Sun and Comets") {// One to ten comets and sun
         objects.append(Object(Point3D(0, 0, 0), Point3D(0, 0, 0), 200, 20, "Sun", Qt::yellow));
         for (int i = 0; i < numberOfComets; i++) {
             objects.append(Object(Point3D(getRandomPoint(50, 250)),
@@ -1175,9 +1162,7 @@ void Planets::reset()
                                   0.1L, "Comet " + toStringI(i + 1), Qt::cyan));
         }
         options->setSystemVelocity(Point3D(0, 0, 0));
-    }
-    else if (scenario == "4 Star Ballet")
-    {
+    } else if (scenario == "4 Star Ballet") {
         objects.append(Object(Point3D(-150, 0, 100), Point3D(  0, -50, 0), 100, 20, "", Qt::cyan));
         objects.append(Object(Point3D( 150, 0, 100), Point3D(  0,  50, 0), 100, 20, "", Qt::magenta));
         objects.append(Object(Point3D(0,  150, -100), Point3D(-50,   0, 0), 100, 20, "", Qt::cyan));
@@ -1185,9 +1170,7 @@ void Planets::reset()
         for (int i = 0; i < objects.size(); i++)
             objects[i].setName("Planet " + QString::number(i + 1));
         options->setSystemVelocity(Point3D(25, 25, 25));
-    }
-    else if (scenario == "Double Double")
-    {
+    } else if (scenario == "Double Double") {
         objects.append(Object(Point3D(0,  275, -25), Point3D(65,   150, 0), 100, 20, "", Qt::red));
         objects.append(Object(Point3D(0,  275,  25), Point3D(65,  -150, 0), 100, 20, "", Qt::blue));
         objects.append(Object(Point3D(0, -275, -25), Point3D(-65,  150, 0), 100, 20, "", Qt::cyan));
@@ -1195,43 +1178,25 @@ void Planets::reset()
         for (int i = 0; i < objects.size(); i++)
             objects[i].setName("Planet " + QString::number(i + 1));
         options->setSystemVelocity(Point3D(0, 0, 0));
-    }
-    else if (scenario == "Solar System")
-    {
+    } else if (scenario == "Solar System") {
         setupSolarSystem();
         ui->speedDoubleSpinBox->setValue(0.25);
         ui->distanceScalarSpin->setValue(1000000);
         options->setSystemVelocity(Point3D(0, 0, 0));
-    }
-    else if (scenario == "Solar System Formation")
-    {
-    for (int i = 0; i < ui->numberOfPlanetsSpinBox->value(); i++) {
-        objects.append(Object(getRandomPoint(0, ui->averagePositionSpinBox->value()),
-                              getRandomPoint(0, ui->averageSpeedSpinBox->value()),
-                              std::abs(generateNormalNumbers(static_cast<long double>(ui->averageMassSpinBox->value()), static_cast<long double>(ui->averageMassSpinBox->value())/2.0L)),
-                              std::abs(generateNormalNumbers(7.5L, 2)), toStringI(i + 1), Qt::yellow));
-    }
-    // the following code makes the system centered and insures that the whole system does not go flying off
-    for (int i = 0; i < objects.size(); i++)
-    {
-            totalMomentum += objects.at(i).getMomentum();
-            totalMass += objects.at(i).getMass();
-    }
-    for (int i = 0; i < objects.size(); i++) {
-            objects[i].setVelocity(objects[i].getVelocity() - totalMomentum/totalMass);
-    }
-    options->setSystemVelocity(totalMomentum/totalMass);
-    }
-    else if (scenario == "Double Slingshot")
-    {
+    } else if (scenario == "Solar System Formation") {
+        for (int i = 0; i < ui->numberOfPlanetsSpinBox->value(); i++) {
+            objects.append(Object(getRandomPoint(0, ui->averagePositionSpinBox->value()),
+                                  getRandomPoint(0, ui->averageSpeedSpinBox->value()),
+                                  std::abs(generateNormalNumbers(static_cast<long double>(ui->averageMassSpinBox->value()), static_cast<long double>(ui->averageMassSpinBox->value())/2.0L)),
+                                  std::abs(generateNormalNumbers(7.5L, 2)), toStringI(i + 1), Qt::yellow));
+        }
+    } else if (scenario == "Double Slingshot") {
         objects.append(Object(Point3D(   0.0L,    0.0L, 0.0L), Point3D(    0.0L,    0.0L, 0.0L), 1000.0L, 30.0L, "Sun", Qt::yellow));
         objects.append(Object(Point3D(-150.0L,    0.0L, 0.0L), Point3D(    0.0L, -400.0L, 0.0L),   20.0L, 10.0L, "Planet 1", Qt::blue));
         objects.append(Object(Point3D(   0.0L, -350.0L, 0.0L), Point3D(  250.0L,    0.0L, 0.0L),   20.0L, 10.0L, "Planet 2", Qt::green));
         objects.append(Object(Point3D(  10.0L,  38.72L, 0.0L), Point3D( -919.8L,  237.5L, 0.0L),    0.1L,  5.0L, "Commet", Qt::gray));
         options->setSystemVelocity(Point3D(0, 0, 0));
-    }
-    else // the free form option
-    {
+    } else { // the free form option
         objects.append(Object(Point3D(   0,  200, 0), Point3D(-50,   0, 0), 100, 20, "", Qt::red));
         objects.append(Object(Point3D( 200,    0, 0), Point3D(  0,  50, 0), 100, 20, "", Qt::blue));
         objects.append(Object(Point3D(   0, -200, 0), Point3D( 50,   0, 0), 100, 20, "", Qt::cyan));
@@ -1242,24 +1207,34 @@ void Planets::reset()
     }
     calculateSystemProperties();
 
-    if (scenario == "Solar System")
-        // this is to ensure that the UI doesn't try to calculate the grav field when the user can't see the result
-    {
+    // this is to ensure that the UI doesn't try to calculate the grav field when the user can't see the result
+    if (scenario == "Solar System") {
         options->setDisplayGravField(false);
         options->setEnableGravField(false);
-        ui->distanceScalarSpin->setMinimum(200000);
+        ui->distanceScalarSpin->setMinimum(20000);
         ui->distanceScalarSpin->setMaximum(15000000);
         ui->distanceScalarSpin->setSingleStep(100000);
         ui->distanceScalarSpin->setValue(200000);
-    }
-    else
-    {
+        ui->integrationComboBox->setCurrentText("Hermite");
+    } else {
         options->setEnableGravField(true);
         ui->distanceScalarSpin->setMinimum(0.25);
         ui->distanceScalarSpin->setMaximum(100);
         ui->distanceScalarSpin->setSingleStep(0.25);
         ui->distanceScalarSpin->setValue(1);
+        ui->integrationComboBox->setCurrentText("Hermite");
     }
+
+    // the following code makes the system centered and insures that the whole system does not go flying off
+    for (int i = 0; i < objects.size(); i++)
+    {
+            totalMomentum += objects.at(i).getMomentum();
+            totalMass += objects.at(i).getMass();
+    }
+    for (int i = 0; i < objects.size(); i++) {
+            objects[i].setVelocity(objects[i].getVelocity() - totalMomentum/totalMass);
+    }
+    options->setSystemVelocity(totalMomentum/totalMass);
 
     if (scenario == "Free Form")
         ui->freeFormBox->show();
@@ -1293,21 +1268,27 @@ void Planets::reset()
     for (int i = 0; i < objects.size(); i++)
         if (objects.at(i).getMass() > maxMass)
             maxMass = objects.at(i).getMass();
-    G = G_real_AU_day_M_E;
-//    if (maxMass > 1000000)
-//        G = G_real;
-//    else
-//        G = G_fake;
+    if (scenario == "Solar System") {
+        G = G_real_kmks;
+        dt = 300;
+        endTime = 30780000*1.1;
+    } else {
+        G = G_real_AU_day_M_E;
+        dt = powl(2,-7);
+        endTime = 365.25;
+    }
+    dt2 = dt*dt;
+    dt3 = dt*dt2;
 
     // this section initializes all of the data storage and capture.
     // it adds all of the headings, so there is more than just a ton of numbers
     data = "Time,";
     for (int i = 0; i < objects.size(); i++)
-        for (int j = 0; j < 13; j++)
+        for (int j = 0; j < 16; j++)
             data += objects.at(i).getName() + ",";
     data += "\n,";
     for (int i = 0; i < objects.size(); i++)
-        data += "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Speed,|Momentum|,Accel X,Accel Y,Accel Z,";
+        data += "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Speed,|Momentum|,Accel X,Accel Y,Accel Z,Jerk X,Jerk Y,Jerk Z,";
     data += "\n";
 
     update();
@@ -1423,4 +1404,24 @@ void Planets::changeIntegrationType(QString newType)
     if (integrationType == "Velocity Verlet") {
         integrationInitialize = 1;
     } else integrationInitialize = 0;
+}
+
+void Planets::on_saveStateButton_clicked()
+{
+    calcAccels(0,true);
+    QString saveMessage;
+    for (int i = 0; i < objects.size(); i++)
+        for (int j = 0; j < 16; j++)
+            saveMessage += objects.at(i).getName() + ",";
+    saveMessage += "\n,";
+    for (int i = 0; i < objects.size(); i++)
+        saveMessage += "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Speed,|Momentum|,Accel X,Accel Y,Accel Z,Jerk X,Jerk Y,Jerk Z,";
+    saveMessage += "\n";
+    saveMessage += toStringL(systemTime) + ",";
+    for (int i = 0; i < objects.size(); i++)
+    {
+        saveMessage += toStringO(objects.at(i), true, true);
+    }
+    saveMessage += "\n";
+    ui->textBrowser->setText(saveMessage);
 }
