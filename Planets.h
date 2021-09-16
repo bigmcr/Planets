@@ -11,6 +11,8 @@
 #include <cmath>
 #include <Point3D.h>
 #include <plane.h>
+#include <Scenario.h>
+#include <QFile>
 
 namespace Ui {
     class Planets;
@@ -73,6 +75,7 @@ private:
 
     void setText();
     void connectEverything();
+    void createScenarios();
 
     bool loadingPlanets;
     Ui::Planets *ui;
@@ -108,11 +111,10 @@ private:
 //  use these constants when using the solar system realistic model
     static constexpr long double G_real_mks = 6.67e-11L;         // meters^3/(kilograms*seconds^2)
     static constexpr long double G_real_kmks = 6.67e-20L;         // kilometers^3/(kilograms*seconds^2)
-    static constexpr long double G_real_AU_day_M_E = 8.83898E-12;   // AU^3/(earth mass * days^2)      Distance - AU, time - days, mass - Earth mass
+    static constexpr long double G_real_AU_day_M_E = 8.88744E-10;   // AU^3/(earth mass * days^2)      Distance - AU, time - days, mass - Earth mass
     long double dt = 0.000976562500;
     long double dt2 = dt*dt;
     long double dt3 = dt*dt2;
-    long double endTime = 365.25;
 
     Point3D getRandomPoint(long double minRadius = 0, long double maxRadius = 100);
 
@@ -135,6 +137,10 @@ private:
     void calculateSystemMass();
     void calculateSystemMomentum();
 
+    QString filename;
+    QFile file;
+    QTextStream outputToFile;
+
     long double calculateEscapeVelocity(Object * planet);
     void setNumberOfPlanets(int number);
     void planetsCollide();
@@ -147,20 +153,13 @@ private:
     void forwardNext();
     void removeObject(int index, bool isTooFar = false);
 
+    QVector<scenario> scenarios;
+    scenario activeScenario;
+
     void setupSolarSystem();
     void setupMenus();
 private slots:
-    void changeScenario1();
-    void changeScenario2();
-    void changeScenario3();
-    void changeScenario4();
-    void changeScenario5();
-    void changeScenario6();
-    void changeScenario7();
-    void changeScenario8();
-    void changeScenario9();
-    void changeScenario0();
-    void on_saveStateButton_clicked();
+    void saveStateButton_clicked();
 };
 
 #endif // PLANETS_H

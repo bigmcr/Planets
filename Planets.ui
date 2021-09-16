@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>692</width>
-    <height>986</height>
+    <width>708</width>
+    <height>1098</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -168,7 +168,7 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="7" column="0">
+       <item row="8" column="0">
         <widget class="QGroupBox" name="freeFormBox">
          <property name="title">
           <string>Free Form</string>
@@ -501,383 +501,7 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QFrame" name="mainButtons">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="statusButton">
-            <property name="text">
-             <string>Status</string>
-            </property>
-            <property name="shortcut">
-             <string>Ctrl+S</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="forwardButton">
-            <property name="text">
-             <string>Step Forward</string>
-            </property>
-            <property name="shortcut">
-             <string>Ctrl+F</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="resetButton">
-            <property name="text">
-             <string>Reset</string>
-            </property>
-            <property name="shortcut">
-             <string>Ctrl+R</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pauseButton">
-            <property name="text">
-             <string>Pause/Resume</string>
-            </property>
-            <property name="shortcut">
-             <string>Ctrl+P</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QPushButton" name="saveStateButton">
-            <property name="text">
-             <string>Save Current State</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QGroupBox" name="integrationGroupBox">
-         <property name="title">
-          <string>Integration Settings</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_10">
-          <item row="1" column="0">
-           <widget class="QLabel" name="timeStepLabel">
-            <property name="text">
-             <string>Time Step (* normal)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="distanceScalarSpin">
-            <property name="minimum">
-             <double>0.250000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>100000000.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-            <property name="value">
-             <double>1.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="speedDoubleSpinBox">
-            <property name="minimum">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="maximum">
-             <double>5.000000000000000</double>
-            </property>
-            <property name="singleStep">
-             <double>0.010000000000000</double>
-            </property>
-            <property name="value">
-             <double>1.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="distanceLabel">
-            <property name="text">
-             <string>Distance Scalar</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="integrationLabel">
-            <property name="text">
-             <string>Integration Type</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="integrationComboBox">
-            <item>
-             <property name="text">
-              <string>Euler</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Euler-Cromber</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Velocity Verlet</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Yoshida</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Hermite</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="6" column="0">
-        <widget class="QGroupBox" name="SolarSystemFormationGroupBox">
-         <property name="title">
-          <string>Solar System Formation</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <item row="2" column="1">
-           <widget class="QSpinBox" name="averagePositionSpinBox">
-            <property name="minimum">
-             <number>50</number>
-            </property>
-            <property name="maximum">
-             <number>500</number>
-            </property>
-            <property name="singleStep">
-             <number>25</number>
-            </property>
-            <property name="value">
-             <number>250</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="numberOfPlanetsSpinBox">
-            <property name="minimum">
-             <number>2</number>
-            </property>
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="value">
-             <number>25</number>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="numberOfPlanetsLabel">
-            <property name="text">
-             <string>Number Of Planets</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QSpinBox" name="averageSpeedSpinBox">
-            <property name="minimum">
-             <number>100</number>
-            </property>
-            <property name="maximum">
-             <number>1000</number>
-            </property>
-            <property name="singleStep">
-             <number>25</number>
-            </property>
-            <property name="value">
-             <number>400</number>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="averageMassLabel">
-            <property name="text">
-             <string>Average Mass</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="averagePositionLabel">
-            <property name="text">
-             <string>Average Position</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="averageSpeedLabel">
-            <property name="text">
-             <string>Average Speed</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QSpinBox" name="averageMassSpinBox">
-            <property name="minimum">
-             <number>100</number>
-            </property>
-            <property name="maximum">
-             <number>5000</number>
-            </property>
-            <property name="singleStep">
-             <number>25</number>
-            </property>
-            <property name="value">
-             <number>150</number>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QComboBox" name="comboBox">
-         <property name="currentIndex">
-          <number>0</number>
-         </property>
-         <item>
-          <property name="text">
-           <string>Earth and Sun</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Double Slingshot</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Binary System</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Sun and Comets</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>4 Star Ballet</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Double Double</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Solar System</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Solar System Formation</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Free Form</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QTextBrowser" name="textBrowser">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>1</horstretch>
-           <verstretch>5</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="tabChangesFocus">
-          <bool>true</bool>
-         </property>
-         <property name="acceptRichText">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QGroupBox" name="typeGroupBox">
-         <property name="title">
-          <string/>
-         </property>
-         <layout class="QHBoxLayout" name="typeLayout">
-          <property name="spacing">
-           <number>6</number>
-          </property>
-          <property name="leftMargin">
-           <number>6</number>
-          </property>
-          <property name="topMargin">
-           <number>6</number>
-          </property>
-          <property name="rightMargin">
-           <number>6</number>
-          </property>
-          <property name="bottomMargin">
-           <number>6</number>
-          </property>
-          <item>
-           <widget class="QRadioButton" name="display2DRadioButton">
-            <property name="text">
-             <string>2D Display</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="display3DRadioButton">
-            <property name="text">
-             <string>3D Display</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="displayRelativityRadioButton">
-            <property name="text">
-             <string>Gravity Curve Display</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="5" column="0">
         <widget class="QGroupBox" name="visualGroupBox">
          <property name="title">
           <string>Visual Settings</string>
@@ -1035,6 +659,504 @@
          </layout>
         </widget>
        </item>
+       <item row="3" column="0">
+        <widget class="QGroupBox" name="typeGroupBox">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QHBoxLayout" name="typeLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
+          <property name="topMargin">
+           <number>6</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
+          </property>
+          <property name="bottomMargin">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QRadioButton" name="display2DRadioButton">
+            <property name="text">
+             <string>2D Display</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="display3DRadioButton">
+            <property name="text">
+             <string>3D Display</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="displayRelativityRadioButton">
+            <property name="text">
+             <string>Gravity Curve Display</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QFrame" name="mainButtons">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="statusButton">
+            <property name="text">
+             <string>Status</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+S</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="forwardButton">
+            <property name="text">
+             <string>Step Forward</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+F</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="resetButton">
+            <property name="text">
+             <string>Reset</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+R</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="pauseButton">
+            <property name="text">
+             <string>Pause/Resume</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+P</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QPushButton" name="saveStateButton">
+            <property name="text">
+             <string>Save Current State</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QGroupBox" name="integrationGroupBox">
+         <property name="title">
+          <string>Integration Settings</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_10">
+          <item row="1" column="1">
+           <widget class="QComboBox" name="integrationComboBox">
+            <item>
+             <property name="text">
+              <string>Euler</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Euler-Cromber</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Velocity Verlet</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Yoshida</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Hermite</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="distanceScalarSpin">
+            <property name="minimum">
+             <double>0.250000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>100000000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="value">
+             <double>1.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="integrationLabel">
+            <property name="text">
+             <string>Integration Type</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="distanceLabel">
+            <property name="text">
+             <string>Distance Scalar</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="7" column="0">
+        <widget class="QGroupBox" name="SolarSystemFormationGroupBox">
+         <property name="title">
+          <string>Solar System Formation</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="averagePositionSpinBox">
+            <property name="minimum">
+             <number>50</number>
+            </property>
+            <property name="maximum">
+             <number>500</number>
+            </property>
+            <property name="singleStep">
+             <number>25</number>
+            </property>
+            <property name="value">
+             <number>250</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="numberOfPlanetsSpinBox">
+            <property name="minimum">
+             <number>2</number>
+            </property>
+            <property name="maximum">
+             <number>100</number>
+            </property>
+            <property name="value">
+             <number>25</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="numberOfPlanetsLabel">
+            <property name="text">
+             <string>Number Of Planets</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QSpinBox" name="averageSpeedSpinBox">
+            <property name="minimum">
+             <number>100</number>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+            <property name="singleStep">
+             <number>25</number>
+            </property>
+            <property name="value">
+             <number>400</number>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="averageMassLabel">
+            <property name="text">
+             <string>Average Mass</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="averagePositionLabel">
+            <property name="text">
+             <string>Average Position</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="averageSpeedLabel">
+            <property name="text">
+             <string>Average Speed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QSpinBox" name="averageMassSpinBox">
+            <property name="minimum">
+             <number>100</number>
+            </property>
+            <property name="maximum">
+             <number>5000</number>
+            </property>
+            <property name="singleStep">
+             <number>25</number>
+            </property>
+            <property name="value">
+             <number>150</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QTextBrowser" name="textBrowser">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>1</horstretch>
+           <verstretch>5</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="tabChangesFocus">
+          <bool>true</bool>
+         </property>
+         <property name="acceptRichText">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QComboBox" name="comboBox">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>Earth and Sun</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Double Slingshot</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Binary System</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Sun and Comets</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>4 Star Ballet</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Double Double</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Solar System</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Solar System Formation</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Free Form</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QGroupBox" name="systemPropertiesGroupBox">
+         <property name="title">
+          <string>Scenario Settings</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="dTLabel">
+            <property name="text">
+             <string>Delta T (Time Units)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="gravConstLabel">
+            <property name="text">
+             <string>Grav Constant</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="timeUnits">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="dT">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="timeUnitsLabel">
+            <property name="text">
+             <string>Time Units</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLabel" name="gravConst">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="bodyCountLabel">
+            <property name="text">
+             <string>Body Count</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLabel" name="bodyCount">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QLabel" name="distanceUnitsLabel">
+            <property name="text">
+             <string>Distance Units</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QLabel" name="distanceUnits">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QLabel" name="massUnitsLabel">
+            <property name="text">
+             <string>Mass Units</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="3">
+           <widget class="QLabel" name="massUnits">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="endTimeLabel">
+            <property name="text">
+             <string>End Time</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="endTime">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="iterPerDataLabel">
+            <property name="text">
+             <string>Iterations per Data Point</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QLabel" name="iterPerData">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -1045,7 +1167,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>692</width>
+     <width>708</width>
      <height>21</height>
     </rect>
    </property>
@@ -1100,23 +1222,8 @@
     <addaction name="actionSystem_Mechanics"/>
     <addaction name="menuDisplay_Options"/>
    </widget>
-   <widget class="QMenu" name="menuScenarios">
-    <property name="title">
-     <string>Scenarios</string>
-    </property>
-    <addaction name="actionEarth_and_Sun"/>
-    <addaction name="actionDouble_Slingshot"/>
-    <addaction name="actionBinary_System"/>
-    <addaction name="actionSun_and_Comets"/>
-    <addaction name="action4_Star_Ballet"/>
-    <addaction name="actionDouble_Double"/>
-    <addaction name="actionSolar_System"/>
-    <addaction name="actionSolar_System_Formation"/>
-    <addaction name="actionFree_Form"/>
-   </widget>
    <addaction name="menuProgram"/>
    <addaction name="menuOptions"/>
-   <addaction name="menuScenarios"/>
   </widget>
   <action name="actionClose">
    <property name="text">

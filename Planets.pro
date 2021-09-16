@@ -15,6 +15,7 @@ INCLUDEPATH += "D:\Dropbox\QT Programming\Include Files"
 SOURCES += main.cpp\
     Matrix.cpp \
     Planets.cpp \
+    Scenario.cpp \
     pictureframe.cpp \
     Options.cpp \
     Matrix3x3.cpp \
@@ -26,6 +27,7 @@ SOURCES += main.cpp\
 HEADERS  += Planets.h \
     Matrix.h \
     Object.h \
+    Scenario.h \
     physicsconsts.h \
     pictureFrame.h \
     precision.h \
