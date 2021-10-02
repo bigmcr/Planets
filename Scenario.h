@@ -17,4 +17,16 @@ bool scenarioIsValid(scenario scen);
 // resets a scenario to defaults
 scenario defaultScenario();
 
+// writes all constant scenarios to the specifed file
+bool writeScenariosV1(QVector<scenario> scens, QString filename);
+
+// read all constant scenarios from the specifed file
+bool readScenariosV1(QVector<scenario> * scenarios, QString filename);
+
+// writes all variable scenarios to the specifed file
+bool writeScenariosV2(QVector<scenario> scens, QString filename);
+
+// read all variable scenarios from the specifed file
+bool readScenariosV2(QVector<scenario> * scenarios, QString filename);
+
 #endif // SCENARIO_H

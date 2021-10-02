@@ -1,0 +1,30 @@
+Scenario v0.1
+name Pythagorean problem
+bigG 8.88744e-10
+dt -14
+iterationsPerDataPoint 1024
+endTime 1000
+lengthUnit AU
+massUnit M_E
+timeUnit day
+planet
+    position 1, 3, 0
+    velocity 0, 0, 0
+    mass 3e+06
+    radius 0.006149059
+    name Sun 3
+    color 0, 255, 0
+planet
+    position -2, -1, 0
+    velocity 0, 0, 0
+    mass 4e+06
+    radius 0.006767916
+    name Sun 4
+    color 255, 0, 0
+planet
+    position 1, -1, 0
+    velocity 0, 0, 0
+    mass 5e+06
+    radius 0.007290516
+    name Sun 5
+    color 0, 0, 255

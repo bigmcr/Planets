@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     Plane.cpp \
     Point3D.cpp \
     scalarUnits.cpp \
-    toString.cpp
+    scenariodialog.cpp \
+    toString.cpp \
+    unit.cpp
 
 HEADERS  += Planets.h \
     Matrix.h \
@@ -31,12 +33,15 @@ HEADERS  += Planets.h \
     physicsconsts.h \
     pictureFrame.h \
     precision.h \
+    scenariodialog.h \
     toString.h \
     tracePoints.h \
     Options.h \
     Point3D.h \
     Matrix3x3.h \
-    scalarUnits.h
+    scalarUnits.h \
+    unit.h
 
 FORMS    += Planets.ui \
-    Options.ui
+    Options.ui \
+    scenariodialog.ui

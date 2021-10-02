@@ -7,6 +7,83 @@
 #include <QRandomGenerator>
 #include <QDebug>
 #include <QFileDialog>
+#include <QDirIterator>
+#include <unit.h>
+
+#include <iostream>
+#include <vector>
+#include <math.h>
+#include <fstream>
+class Body {
+private:
+    double G= 1;
+    Point3D r;
+    Point3D v;
+    double mass;
+    double dt = 0.1;
+    Point3D d;
+    Point3D r1;
+    Point3D r2;
+    Point3D r3;
+    Point3D r4;
+    Point3D v1;
+    Point3D v2;
+    Point3D v3;
+    Point3D v4;
+    Point3D a1;
+    Point3D a2;
+    Point3D a3;
+    Point3D a4;
+public:
+    Body(Point3D newR, Point3D newV, double newMass) {
+        r = newR;
+        v = newV;
+        mass = newMass;
+    }
+    void update(Body b) {
+        v1 = v;
+        r1 = r;
+        d = b.r - r;
+        a1 = G * b.mass * d / (d.length() * d.magSqr());
+
+        v2 = v1 + a1 * dt * 0.5;
+        r2 = r1 + v * dt * 0.5;
+        d = b.r - r2;
+        a2 = G * b.mass * d / (d.length() * d.magSqr());
+
+        v3 = v + a2 * dt * 0.5;
+        r3 = r + v2 * dt * 0.5;
+        d = b.r - r3;
+        a3 = G * b.mass * d / (d.length() * d.magSqr());
+
+        v4 = v + a3 * dt;
+        r4 = r + v3 * dt;
+        d = b.r - r4;
+        a4 = G * b.mass * d / (d.length() * d.magSqr());
+
+        r = r + (v1 + 2 * v2 + 2 * v3 + v4) / 6.0L * dt;
+        v = v + (a1 + 2 * a2 + 2 * a3 + a4) / 6.0L * dt;
+    }
+    double get_x() {return r.x();}
+    double get_y() {return r.y();}
+};
+
+int main() {
+    Body body1(Point3D(    0,     0,     0), Point3D(     0,  -0.527046,     0), 1000);
+    Body body2(Point3D(  600,     0,     0), Point3D(     0,   1.054090,     0),  500);
+    std::ofstream pos;
+    pos.open ("Position.csv");
+    pos << "iteration,body2 x,body2 y,body1 x,body1 y" << "\n";
+    int N=100000;
+    for(int i = 0; i < N; i++) {
+        body2.update(body1);
+        body1.update(body2);
+        pos << i << "," << body2.get_x() << "," << body2.get_y() << "," << body1.get_x() << "," << body1.get_y() << "\n";
+    }
+    pos.close();
+    return 0;
+}
+
 
 Point3D::dataType Planets::w_0 = -powl(2.0 , 1/3.0)/(2.0 - powl(2, 1.0/3.0));
 Point3D::dataType Planets::w_1 = 1 / (2.0 - powl(2.0 , 1/3.0));
@@ -17,6 +94,7 @@ Point3D::dataType Planets::yoshidaC3 = Planets::yoshidaC2;
 Point3D::dataType Planets::yoshidaD1 = Planets::w_1;
 Point3D::dataType Planets::yoshidaD3 = Planets::yoshidaD1;
 Point3D::dataType Planets::yoshidaD2 = Planets::w_0;
+QString Planets::defaultIntegrationType = "Hermite";
 
 long double generateNormalNumbers(long double mu = 0.0L, long double sigma = 1.0L)
 {
@@ -97,10 +175,11 @@ Planets::Planets(QWidget *parent) : QMainWindow(parent),
     timer->setInterval(5);
     box = new QMessageBox(this);                // for debug and messages
     options = new Options();              // the options dialog
+    scenarioEditor = new ScenarioDialog();
     mouseIsRotating = false;
     mouseIsPanning = false;
     lastPos = QPoint(0,0);
-    integrationType = "Euler";
+    integrationType = defaultIntegrationType;
 
     filename = "C:\\Users\\McRed\\Desktop\\Motion Integration.csv";//QFileDialog::getSaveFileName(this, "Save File Name", "Motion Integration.csv", "CSV files (.csv);;Zip files (.zip, *.7z)", 0, 0); // getting the filename (full path)
     file.setFileName(filename);
@@ -110,7 +189,11 @@ Planets::Planets(QWidget *parent) : QMainWindow(parent),
     ui->viewGroupBox->setStyleSheet("color: green");
     resize(1000, 800);
 
-    createScenarios();
+    loadScenarios();
+
+//    qDebug() << "writing scenarios to file resulted in" << writeScenariosV1(scenarios, "C:\\Users\\McRed\\Desktop\\TestScenarioOutput.scen");
+
+//    readScenariosV1(&scenarios, "C:\\Users\\McRed\\iCloudDrive\\QT Programming\\Planets\\DefaultScenarios.scen");
 
     ui->comboBox->clear();
     for (int i = 0; i < scenarios.length(); i++) {
@@ -118,6 +201,7 @@ Planets::Planets(QWidget *parent) : QMainWindow(parent),
     }
     ui->comboBox->setCurrentIndex(0);
     calcAccels(0, true);
+    main();
 }
 
 void Planets::setupMenus()
@@ -215,54 +299,18 @@ void Planets::connectEverything()
     connect(ui->viewerPositionZSpinBox, SIGNAL(valueChanged(double)), this, SLOT(update()));
 
     connect(ui->actionOptions, SIGNAL(triggered()), options, SLOT(show()));
+    connect(ui->scenarioEditorPushButton, SIGNAL(clicked()), scenarioEditor, SLOT(show()));
 
     connect(options, SIGNAL(somethingChanged()), this, SLOT(update()));
     connect(options, SIGNAL(traceChanged(bool)), this, SLOT(updateTrace(bool)));
 
     connect(ui->viewComboBox, SIGNAL(activated(QString)), this, SLOT(changeView(QString)));
+
+    connect(ui->integrationComboBox, SIGNAL(activated(QString)), this, SLOT(changeIntegrationType(QString)));
 }
 
-void Planets::createScenarios() {
+void Planets::loadScenarios() {
     scenario newScenario;
-
-    newScenario.name = "Earth and Sun (Earth Units)";
-    newScenario.planets.append(Object(      Point3D(              0,        0,      0), Point3D(        0,              0,              0), 333054.2532,    0.004654793, "Sun", Qt::yellow));
-    newScenario.planets.append(Object(      Point3D(    1.016725701,        0,      0), Point3D(        0,    0.016916391,              0),         1.0,    4.25875E-05, "Earth", Qt::blue));
-    newScenario.bigG = G_real_AU_day_M_E;
-    newScenario.dt = powl(2, -7);
-    newScenario.iterationsPerDataPoint = 64;
-    newScenario.endTime = 365.25;
-    newScenario.lengthUnit = "AU";
-    newScenario.massUnit = "M_E";
-    newScenario.timeUnit = "day";
-    scenarios.append(newScenario);
-
-    newScenario = defaultScenario();
-    newScenario.name = "Pythagorean problem";
-    newScenario.planets.append(Object(Point3D( 1,  3,  0), Point3D(0, 0, 0), 3e6, 1e-9, "Sun 3", Qt::yellow));
-    newScenario.planets.append(Object(Point3D(-2, -1,  0), Point3D(0, 0, 0), 4e6, 1e-9, "Sun 4", Qt::red));
-    newScenario.planets.append(Object(Point3D( 1, -1,  0), Point3D(0, 0, 0), 5e6, 1e-9, "Sun 5", Qt::blue));
-    newScenario.bigG = G_real_AU_day_M_E;
-    newScenario.dt = powl(2, -14);
-    newScenario.iterationsPerDataPoint = 1024;
-    newScenario.endTime = 1000;
-    newScenario.lengthUnit = "AU";
-    newScenario.massUnit = "M_E";
-    newScenario.timeUnit = "day";
-    scenarios.append(newScenario);
-
-    newScenario = defaultScenario();
-    newScenario.name = "Binary System";
-    newScenario.planets.append(Object(Point3D(-1, 0, 0), Point3D(0, -0.5, 0), 1e9, 1e-3, "Sun 1", Qt::yellow));
-    newScenario.planets.append(Object(Point3D( 1, 0, 0), Point3D(0,  0.5, 0), 1e9, 1e-3, "Sun 2", Qt::red));
-    newScenario.bigG = G_real_AU_day_M_E;
-    newScenario.dt = powl(2, -10);
-    newScenario.iterationsPerDataPoint = 1024;
-    newScenario.endTime = 4000;
-    newScenario.lengthUnit = "AU";
-    newScenario.massUnit = "M_E";
-    newScenario.timeUnit = "day";
-    scenarios.append(newScenario);
 
     newScenario = defaultScenario();
     newScenario.name = "Sun and Comets";
@@ -273,36 +321,6 @@ void Planets::createScenarios() {
                               Point3D(getRand(125.0L, 60.0L, true), getRand(125.0L, 60.0L, true), getRand(125.0L, 60.0L, true)), 0.1L,
                               0.1L, "Comet " + toStringI(i + 1), Qt::cyan));
     }
-    newScenario.bigG = G_real_AU_day_M_E;
-    newScenario.dt = powl(2, -7);
-    newScenario.iterationsPerDataPoint = 512;
-    newScenario.endTime = 365.25;
-    newScenario.lengthUnit = "AU";
-    newScenario.massUnit = "M_E";
-    newScenario.timeUnit = "day";
-    scenarios.append(newScenario);
-
-    newScenario = defaultScenario();
-    newScenario.name = "4 Star Ballet";
-    newScenario.planets.append(Object(Point3D(-150, 0, 100), Point3D(  0, -50, 0), 100, 20, "Planet 1", Qt::cyan));
-    newScenario.planets.append(Object(Point3D( 150, 0, 100), Point3D(  0,  50, 0), 100, 20, "Planet 2", Qt::magenta));
-    newScenario.planets.append(Object(Point3D(0,  150, -100), Point3D(-50,   0, 0), 100, 20, "Planet 3", Qt::cyan));
-    newScenario.planets.append(Object(Point3D(0, -150, -100), Point3D( 50,   0, 0), 100, 20, "Planet 4", Qt::magenta));
-    newScenario.bigG = G_real_AU_day_M_E;
-    newScenario.dt = powl(2, -7);
-    newScenario.iterationsPerDataPoint = 512;
-    newScenario.endTime = 365.25;
-    newScenario.lengthUnit = "AU";
-    newScenario.massUnit = "M_E";
-    newScenario.timeUnit = "day";
-    scenarios.append(newScenario);
-
-    newScenario = defaultScenario();
-    newScenario.name = "Double Double";
-    newScenario.planets.append(Object(Point3D(0,  275, -25), Point3D(65,   150, 0), 100, 20, "Planet 1", Qt::red));
-    newScenario.planets.append(Object(Point3D(0,  275,  25), Point3D(65,  -150, 0), 100, 20, "Planet 2", Qt::blue));
-    newScenario.planets.append(Object(Point3D(0, -275, -25), Point3D(-65,  150, 0), 100, 20, "Planet 3", Qt::cyan));
-    newScenario.planets.append(Object(Point3D(0, -275,  25), Point3D(-65, -150, 0), 100, 20, "Planet 4", Qt::magenta));
     newScenario.bigG = G_real_AU_day_M_E;
     newScenario.dt = powl(2, -7);
     newScenario.iterationsPerDataPoint = 512;
@@ -332,7 +350,7 @@ void Planets::createScenarios() {
     Pluto[0] = 7304204904; 	Pluto[1] = 3.70523124577267; 	Pluto[2] = 1.25E+22; 	Pluto[3] = 1195;
 
     newScenario.planets.append(Object(Point3D(Sun[0],     0), Point3D(0, Sun[0]),     Sun[2],     Sun[3],     "Sun",       Qt::yellow));
-    newScenario.planets.append(Object(Point3D(Mercury[0], 0), Point3D(0, Mercury[1]), Mercury[2], Mercury[3], "Mercury",   Qt::red));
+    newScenario.planets.append(Object(Point3D(Mercury[0], 0), Point3D(0, Mercury[1]), Mercury[2], Mercury[3], "Mercury",   Qt::gray));
     newScenario.planets.append(Object(Point3D(Venus[0],   0), Point3D(0, Venus[1]),   Venus[2],   Venus[3],   "Venus",     Qt::yellow));
     newScenario.planets.append(Object(Point3D(Earth[0],   0), Point3D(0, Earth[1]),   Earth[2],   Earth[3],   "Earth",     Qt::cyan));
     newScenario.planets.append(Object(Point3D(Mars[0],    0), Point3D(0, Mars[1]),    Mars[2],    Mars[3],    "Mars",      Qt::red));
@@ -368,23 +386,28 @@ void Planets::createScenarios() {
     newScenario.timeUnit = "day";
     scenarios.append(newScenario);
 
+    // Load the scenario files in the iCloud directory
+    QFileInfoList hitList; // Container for matches
+    QString directory = "C:\\Users\\McRed\\iCloudDrive\\QT Programming\\Planets\\Scenarios";
+    QDirIterator it(directory, QDirIterator::Subdirectories);
 
-    newScenario = defaultScenario();
-    newScenario.name = "Double Double";
-    newScenario.planets.append(Object(Point3D(   0,  200, 0), Point3D(-50,   0, 0), 100, 20, "", Qt::red));
-    newScenario.planets.append(Object(Point3D( 200,    0, 0), Point3D(  0,  50, 0), 100, 20, "", Qt::blue));
-    newScenario.planets.append(Object(Point3D(   0, -200, 0), Point3D( 50,   0, 0), 100, 20, "", Qt::cyan));
-    newScenario.planets.append(Object(Point3D(-200,    0, 0), Point3D(  0, -50, 0), 100, 20, "", Qt::magenta));
-    for (int i = 0; i < newScenario.planets.size(); i++)
-        newScenario.planets[i].setName("Planet " + QString::number(i + 1));
-    newScenario.bigG = G_real_AU_day_M_E;
-    newScenario.dt = 300;
-    newScenario.iterationsPerDataPoint = 512;
-    newScenario.endTime = 365.25;
-    newScenario.lengthUnit = "AU";
-    newScenario.massUnit = "M_E";
-    newScenario.timeUnit = "day";
-    scenarios.append(newScenario);
+    // Iterate through the directory using the QDirIterator
+    while (it.hasNext()) {
+        QString filename = it.next();
+        QFileInfo file(filename);
+
+        // Check if it's a dir
+        if (file.isDir()) continue;
+
+        // If the filename contains target string - put it in the hitlist
+        if (file.fileName().endsWith(".scen", Qt::CaseSensitive)) {
+            hitList.append(file);
+        }
+    }
+
+    foreach (QFileInfo hit, hitList) {
+        readScenariosV1(&scenarios, hit.absoluteFilePath());
+    }
 }
 
 void Planets::changeView(QString newView)
@@ -479,6 +502,7 @@ void Planets::resetView()
 
 Planets::~Planets()
 {
+    delete scenarioEditor;
 	delete options;
     delete ui;
 }
@@ -487,6 +511,7 @@ void Planets::close()
 {
 	QMainWindow::close();
 	options->close();
+    scenarioEditor->close();
 }
 
 void Planets::paintEvent(QPaintEvent * event)
@@ -537,70 +562,6 @@ void Planets::debug(QString message, QString subMessage)
 	box->exec();
 }
 
-int Planets::getNumber(QColor color)
-{
-	if (color == Qt::white) return 0;
-	if (color == Qt::black) return 1;
-	if (color == Qt::red) return 2;
-	if (color == Qt::darkRed) return 3;
-	if (color == Qt::green) return 4;
-	if (color == Qt::darkGreen) return 5;
-	if (color == Qt::blue) return 6;
-	if (color == Qt::darkBlue) return 7;
-	if (color == Qt::cyan) return 8;
-	if (color == Qt::darkCyan) return 9;
-	if (color == Qt::magenta) return 10;
-	if (color == Qt::darkMagenta) return 11;
-	if (color == Qt::yellow) return 12;
-	if (color == Qt::darkYellow) return 13;
-	if (color == Qt::gray) return 14;
-	if (color == Qt::lightGray) return 15;
-	if (color == Qt::darkGray) return 16;
-	return 0;
-}
-
-QColor Planets::getColor(int newColor)
-{
-	switch (newColor)
-	{
-	case 0:
-		return Qt::white;
-	case 1:
-		return Qt::black;
-	case 2:
-		return Qt::red;
-	case 3:
-		return Qt::darkRed;
-	case 4:
-		return Qt::green;
-	case 5:
-		return Qt::darkGreen;
-	case 6:
-		return Qt::blue;
-	case 7:
-		return Qt::darkBlue;
-	case 8:
-		return Qt::cyan;
-	case 9:
-		return Qt::darkCyan;
-	case 10:
-		return Qt::magenta;
-	case 11:
-		return Qt::darkMagenta;
-	case 12:
-		return Qt::yellow;
-	case 13:
-		return Qt::darkYellow;
-	case 14:
-		return Qt::gray;
-	case 15:
-		return Qt::lightGray;
-	case 16:
-		return Qt::darkGray;
-	}
-	return Qt::white;
-}
-
 void Planets::planetsChangeNumber()
 {
     if (ui->planetComboBox->currentText() == "Free Form")
@@ -642,7 +603,7 @@ void Planets::planetsCollide()
         }
     }
     if (planet1 != -1) {
-        qDebug() << objects.at(planet1).getName() + " and planet " + objects.at(planet2).getName() + " are colliding!";
+        qDebug() << objects.at(planet1).getName() + " and " + objects.at(planet2).getName() + " are colliding!";
         if (planet1 > planet2)
         {
             int temp;
@@ -680,6 +641,7 @@ void Planets::planetsCollide()
         objects.insert(planet1, Object(position, momentum/mass, mass, radius, name, color));
         // recursively call planetsCollide until all collisions have been resolved
         planetsCollide();
+        qDebug() << objects.at(planet1).getName() + " and " + objects.at(planet2).getName() + " have collided!";
     }
 }
 
@@ -751,6 +713,17 @@ void Planets::calculateSystemMomentum()
     systemMomentum = Point3D(0, 0, 0);
 	for (int i = 0; i < objects.size(); i++)
 		systemMomentum += objects.at(i).getMomentum();
+}
+
+Point3D Planets::calculateCenterOfMass()
+{
+    Point3D massPosition = Point3D(0, 0, 0);
+    long double totalMass = 0;
+    for (int i = 0; i < objects.size(); i++) {
+        massPosition += objects.at(i).getMass()*objects.at(i).getPosition();
+        totalMass += objects.at(i).getMass();
+    }
+    return centerOfMass = massPosition/totalMass;
 }
 
 Point3D Planets::getRandomPoint(long double minRadius, long double maxRadius)
@@ -928,19 +901,39 @@ void Planets::calculateGravityForce(Plane plane)
 
 void Planets::forward()
 {
+    bool fileJustOpened = false;
     if (!file.isOpen()) {
         if (file.open(QFile::WriteOnly | QFile::Truncate)) {
             outputToFile.setDevice(&file);
-            QString headerData = "Time,";
-            for (int i = 0; i < objects.size(); i++)
-                for (int j = 0; j < 14; j++)
-                    headerData += objects.at(i).getName() + ",";
-            headerData += "\n" + activeScenario.timeUnit + ",";
-            for (int i = 0; i < objects.size(); i++)
-                headerData += "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Accel X,Accel Y,Accel Z,Jerk X,Jerk Y,Jerk Z,";
-            headerData += "\n";
-            outputToFile << headerData;
+            fileJustOpened = true;
         } else qDebug() << "Output file failed to open!";
+    }
+    if (fileJustOpened || firstRun) {
+        QString headerData = "Time,";
+        for (int i = 0; i < objects.size(); i++)
+            for (int j = 0; j < 14; j++)
+                headerData += objects.at(i).getName() + ",";
+        headerData += ",,Integration Type\n" + activeScenario.timeUnit + ",";
+        for (int i = 0; i < objects.size(); i++)
+            headerData += "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Accel X,Accel Y,Accel Z,Jerk X,Jerk Y,Jerk Z,";
+        headerData += ",," + integrationType + "\n";
+        outputToFile << headerData;
+
+        if (integrationType == "RK4") {
+            QVector<Point3D> emptyArray;
+            emptyArray.resize(objects.length());
+
+            RK4_k_r.clear();
+            while (RK4_k_r.length() != 4) {RK4_k_r.append(emptyArray);}
+
+            RK4_k_v.clear();
+            while (RK4_k_v.length() != 4) {RK4_k_v.append(emptyArray);}
+
+            RK4_k_a.clear();
+            while (RK4_k_a.length() != 4) {RK4_k_a.append(emptyArray);}
+        }
+
+        firstRun = false;
     }
     long double totalTime = 0.0L;
     if (file.isOpen()) {
@@ -961,8 +954,10 @@ void Planets::forward()
         else if (integrationType == "Velocity Verlet") {VelocityVerlet();}
         else if (integrationType == "Yoshida") {Yoshida();}
         else if (integrationType == "Euler") {Euler();}
+        else if (integrationType == "RK4") {RK4();}
         planetsCollide();
     }
+    if (integrationType == "RK4") {calcAccels();}
 
     if (options->displayTrace())
     {
@@ -986,6 +981,13 @@ void Planets::forward()
 
     // if any of the trigger conditions have hit, stop the simulation and close the file
     if (((activeScenario.endTime != -1) && (systemTime >= activeScenario.endTime)) || objects.size() == 1) {
+        outputToFile << "\n\n";
+        outputToFile << ",value,log_2 of value\n";
+        outputToFile << "dt," << double(activeScenario.dt) << "," << double(log2(activeScenario.dt)) << "\n";
+        outputToFile << "iterations per datapoint," << double(activeScenario.iterationsPerDataPoint) << "," << log2(activeScenario.iterationsPerDataPoint) << "\n";
+        outputToFile << "length unit," << activeScenario.lengthUnit << "," << Unit::getLongName(activeScenario.lengthUnit) << "\n";
+        outputToFile << "time unit," << activeScenario.timeUnit << "," << Unit::getLongName(activeScenario.timeUnit) << "\n";
+        outputToFile << "mass unit," << activeScenario.massUnit << "," << Unit::getLongName(activeScenario.massUnit) << "\n";
         file.close();
         timer->stop();
     }
@@ -1146,15 +1148,60 @@ void Planets::Hermite() {
     }
 }
 
-Point3D Planets::calculateCenterOfMass()
-{
-    Point3D massPosition = Point3D(0, 0, 0);
-    long double totalMass = 0;
-    for (int i = 0; i < objects.size(); i++) {
-		massPosition += objects.at(i).getMass()*objects.at(i).getPosition();
-		totalMass += objects.at(i).getMass();
-	}
-	return centerOfMass = massPosition/totalMass;
+void Planets::RK4() {
+    Point3D d;
+    for (int i = 0; i < objects.length(); i++) {
+        RK4_k_r[0][i] = objects.at(i).getPosition();
+        RK4_k_v[0][i] = objects.at(i).getVelocity();
+        RK4_k_a[0][i] = Point3D();
+        for (int j = 0; j < objects.length(); j++) {
+            if (i != j) {
+                d = objects.at(j).getPosition() - RK4_k_r[0][i];
+                RK4_k_a[0][i] += G * objects.at(j).getMass() * d / (d.length() * d.magSqr());
+            }
+        }
+    }
+
+    for (int i = 0; i < objects.length(); i++) {
+        RK4_k_v[1][i] = RK4_k_v[0][i] + RK4_k_a[0][i] * dt * 0.5;
+        RK4_k_r[1][i] = RK4_k_r[0][i] + RK4_k_v[0][i] * dt * 0.5;
+        RK4_k_a[1][i] = Point3D();
+        for (int j = 0; j < objects.length(); j++) {
+            if (i != j) {
+                d = objects.at(j).getPosition() - RK4_k_r[1][i];
+                RK4_k_a[1][i] += G * objects.at(j).getMass() * d / (d.length() * d.magSqr());
+            }
+        }
+    }
+
+    for (int i = 0; i < objects.length(); i++) {
+        RK4_k_v[2][i] = RK4_k_v[0][i] + RK4_k_a[1][i] * dt * 0.5;
+        RK4_k_r[2][i] = RK4_k_r[0][i] + RK4_k_v[1][i] * dt * 0.5;
+        RK4_k_a[2][i] = Point3D();
+        for (int j = 0; j < objects.length(); j++) {
+            if (i != j) {
+                d = objects.at(j).getPosition() - RK4_k_r[2][i];
+                RK4_k_a[2][i] += G * objects.at(j).getMass() * d / (d.length() * d.magSqr());
+            }
+        }
+    }
+
+    for (int i = 0; i < objects.length(); i++) {
+        RK4_k_v[3][i] = RK4_k_v[0][i] + RK4_k_a[2][i] * dt;
+        RK4_k_r[3][i] = RK4_k_r[0][i] + RK4_k_v[2][i] * dt;
+        RK4_k_a[3][i] = Point3D();
+        for (int j = 0; j < objects.length(); j++) {
+            if (i != j) {
+                d = objects.at(j).getPosition() - RK4_k_r[3][i];
+                RK4_k_a[3][i] += G * objects.at(j).getMass() * d / (d.length() * d.magSqr());
+            }
+        }
+    }
+
+    for (int i = 0; i < objects.length(); i++) {
+        objects[i].setPosition(objects.at(i).getPosition() + (RK4_k_v[0][i] + 2.0 * RK4_k_v[1][i] + 2.0 * RK4_k_v[2][i] + RK4_k_v[3][i]) / 6.0L * dt);
+        objects[i].setVelocity(objects.at(i).getVelocity() + (RK4_k_a[0][i] + 2.0 * RK4_k_a[1][i] + 2.0 * RK4_k_a[2][i] + RK4_k_a[3][i]) / 6.0L * dt);
+    }
 }
 
 void Planets::status()
@@ -1203,7 +1250,6 @@ void Planets::reset()
     options->setTraceNumber(1000);              // the number of previous positions to record
     options->setSystemCentered(true);           // whether or not the screen stays centered on the system
     systemMass = 100;                           // this is all of the mass in the entire system
-    ui->distanceScalarSpin->setValue(1);        // this is the scalar that decides how far out the view is
     centerOfMass = Point3D(0, 0, 0);            // the current center of mass of the system
     objects.clear();                            // the list of the orbiting objects
     trails.clear();                             // the list of the trails of all of the orbiting objects
@@ -1213,6 +1259,7 @@ void Planets::reset()
     removedObjects.setMass(0);
     removedObjects.setVelocity(Point3D(0, 0, 0));
     activeScenario = defaultScenario();
+    firstRun = true;
 
     for (int i = 0; i < scenarios.length(); i++ ) {
         if (scenarios.at(i).name == ui->comboBox->currentText() && scenarioIsValid(scenarios.at(i))) {
@@ -1235,14 +1282,13 @@ void Planets::reset()
         ui->distanceScalarSpin->setMaximum(15000000);
         ui->distanceScalarSpin->setSingleStep(1000);
         ui->distanceScalarSpin->setValue(200000);
-        ui->integrationComboBox->setCurrentText("Hermite");
+        ui->integrationComboBox->setCurrentText(defaultIntegrationType);
     } else {
         options->setEnableGravField(true);
-        ui->distanceScalarSpin->setMinimum(0.25);
+        ui->distanceScalarSpin->setMinimum(0.05);
         ui->distanceScalarSpin->setMaximum(100);
-        ui->distanceScalarSpin->setSingleStep(0.25);
-        ui->distanceScalarSpin->setValue(1);
-        ui->integrationComboBox->setCurrentText("Hermite");
+        ui->distanceScalarSpin->setSingleStep(0.05);
+        ui->integrationComboBox->setCurrentText(defaultIntegrationType);
     }
 
     ui->dT->setText(QString::number(double(dt)));

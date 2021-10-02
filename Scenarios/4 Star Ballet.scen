@@ -1,0 +1,37 @@
+Scenario v0.1
+name 4 Star Ballet
+bigG 8.88744e-10
+dt -10
+iterationsPerDataPoint 1024
+endTime 4000
+lengthUnit au
+massUnit m_e
+timeUnit day
+planet
+    position -10, 0, 0
+    velocity 0, -0.273838958, 0
+    mass 1e+09
+    radius 0.001
+    name Sun 1
+    color 255, 0, 0
+planet
+    position 10, 0, 0
+    velocity 0, 0.273838958, 0
+    mass 1e+09
+    radius 0.001
+    name Sun 2
+    color 0, 255, 0
+planet
+    position 0, -10, 0
+    velocity 0.273838958, 0, 0
+    mass 1e+09
+    radius 0.001
+    name Sun 3
+    color 255, 0, 255
+planet
+    position 0, 10, 0
+    velocity -0.273838958, 0, 0
+    mass 1e+09
+    radius 0.001
+    name Sun 4
+    color 255, 255, 0

@@ -32,6 +32,7 @@ public:
     Point3D setAccel(Point3D newAccel) {oldAccel = accel; return accel = newAccel;}
     Point3D setJerk(Point3D newJerk) {oldJerk = jerk; return jerk = newJerk;}
     long double setMass(long double newMass) {return mass = newMass;}
+    long double setEnergy(long double newEnergy) {return energy = newEnergy;}
     long double setRadius(long double newRadius) {return radius = newRadius;}
     QString setName(QString newName) {return name = newName;}
     QColor setColor(QColor newColor) {return color = newColor;}
@@ -43,6 +44,7 @@ public:
     Point3D getAccel() const {return accel;}
     Point3D getJerk() const {return jerk;}
     long double getMass() const {return mass;}
+    long double getEnergy() const {return energy;}
     long double getRadius() const {return radius;}
     QString getName() const {return name;}
     QColor getColor() const {return color;}
@@ -53,7 +55,7 @@ public:
     QList<Point3D> getTrace() const {return trace;}
     void clearTrace() {trace.clear();}
 
-    long double getSpeed() const {return sqrtl(velocity.length());}
+    long double getSpeed() const {return velocity.length();}
     Point3D getMomentum() const {return velocity*mass;}
     long double distance(Point3D point) const {return sqrtl(point.x() * point.x() + point.y()*point.y());}
     void shiftTrace(Point3D center) {for (int i = 0; i < trace.size(); i++) trace[i] -= center;}
@@ -85,6 +87,7 @@ private:
     Point3D velocity;
     Point3D accel;
     Point3D jerk;
+    long double energy;
     long double mass;
     long double radius;
     QString name;

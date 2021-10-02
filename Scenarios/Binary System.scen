@@ -1,0 +1,23 @@
+Scenario v0.1
+name Binary System
+bigG 8.88744e-10
+dt -10
+iterationsPerDataPoint 1024
+endTime 4000
+lengthUnit au
+massUnit m_e
+timeUnit day
+planet
+    position -1, 0, 0
+    velocity 0, -0.5, 0
+    mass 1e+09
+    radius 0.1
+    name Sun 1
+    color 255, 255, 0
+planet
+    position 1, 0, 0
+    velocity 0, 0.5, 0
+    mass 1e+09
+    radius 0.1
+    name Sun 2
+    color 255, 0, 0

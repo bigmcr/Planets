@@ -13,6 +13,7 @@
 #include <plane.h>
 #include <Scenario.h>
 #include <QFile>
+#include <scenariodialog.h>
 
 namespace Ui {
     class Planets;
@@ -70,16 +71,15 @@ private:
 
 //    Point3D calculateForceOnPoint(Point3D point, const int planet);
 //    void calculateNextPosition(const int i);
-    QColor getColor(int);
-    int getNumber(QColor color);
 
     void setText();
     void connectEverything();
-    void createScenarios();
+    void loadScenarios();
 
     bool loadingPlanets;
     Ui::Planets *ui;
     Options * options;
+    ScenarioDialog * scenarioEditor;
 
     void debug(QString, QString = "");
 
@@ -124,6 +124,7 @@ private:
     void VelocityVerlet();
     void Yoshida();
     void Hermite();
+    void RK4();
     static Point3D::dataType w_0;
     static Point3D::dataType w_1;
     static Point3D::dataType yoshidaC1;
@@ -133,6 +134,13 @@ private:
     static Point3D::dataType yoshidaD1;
     static Point3D::dataType yoshidaD3;
     static Point3D::dataType yoshidaD2;
+    QVector<QVector<Point3D>> RK4_k_r;
+    QVector<QVector<Point3D>> RK4_k_v;
+    QVector<QVector<Point3D>> RK4_k_a;
+    bool firstRun;
+
+    static QString defaultIntegrationType;
+
     void calculateSystemProperties();
     void calculateSystemMass();
     void calculateSystemMomentum();
