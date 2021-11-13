@@ -11,8 +11,8 @@ class Object
 {
 public:
     Object(Point3D newPosition = Point3D(),
-           Point3D newVel = Point3D(), long double newMass = 0.0L,
-           long double newRadius = 0.0L, QString newName = "",
+           Point3D newVel = Point3D(), Point3D::dataType newMass = 0.0L,
+           Point3D::dataType newRadius = 0.0L, QString newName = "",
            QColor newColor = QColor())
     {
         setVelocity(newVel);
@@ -31,9 +31,9 @@ public:
     Point3D setVelocity(Point3D newVel) {oldVel = velocity; return velocity = newVel;}
     Point3D setAccel(Point3D newAccel) {oldAccel = accel; return accel = newAccel;}
     Point3D setJerk(Point3D newJerk) {oldJerk = jerk; return jerk = newJerk;}
-    long double setMass(long double newMass) {return mass = newMass;}
-    long double setEnergy(long double newEnergy) {return energy = newEnergy;}
-    long double setRadius(long double newRadius) {return radius = newRadius;}
+    Point3D::dataType setMass(Point3D::dataType newMass) {return mass = newMass;}
+    Point3D::dataType setEnergy(Point3D::dataType newEnergy) {return energy = newEnergy;}
+    Point3D::dataType setRadius(Point3D::dataType newRadius) {return radius = newRadius;}
     QString setName(QString newName) {return name = newName;}
     QColor setColor(QColor newColor) {return color = newColor;}
     void addToTrace(Point3D newPoint){trace.append(newPoint);}
@@ -43,21 +43,21 @@ public:
     Point3D getVelocity() const {return velocity;}
     Point3D getAccel() const {return accel;}
     Point3D getJerk() const {return jerk;}
-    long double getMass() const {return mass;}
-    long double getEnergy() const {return energy;}
-    long double getRadius() const {return radius;}
+    Point3D::dataType getMass() const {return mass;}
+    Point3D::dataType getEnergy() const {return energy;}
+    Point3D::dataType getRadius() const {return radius;}
     QString getName() const {return name;}
     QColor getColor() const {return color;}
-    long double x() const {return position.x();}
-    long double y() const {return position.y();}
-    long double dx() const {return velocity.x();}
-    long double dy() const {return velocity.y();}
+    Point3D::dataType x() const {return position.x();}
+    Point3D::dataType y() const {return position.y();}
+    Point3D::dataType dx() const {return velocity.x();}
+    Point3D::dataType dy() const {return velocity.y();}
     QList<Point3D> getTrace() const {return trace;}
     void clearTrace() {trace.clear();}
 
-    long double getSpeed() const {return velocity.length();}
+    Point3D::dataType getSpeed() const {return velocity.length();}
     Point3D getMomentum() const {return velocity*mass;}
-    long double distance(Point3D point) const {return sqrtl(point.x() * point.x() + point.y()*point.y());}
+    Point3D::dataType distance(Point3D point) const {return sqrtl(point.x() * point.x() + point.y()*point.y());}
     void shiftTrace(Point3D center) {for (int i = 0; i < trace.size(); i++) trace[i] -= center;}
     Point3D setVelocity_plus_half(Point3D newV1_2) {return velocity_plus_half = newV1_2;}
     Point3D setAccel_N_Minus_one(Point3D newAcc_minus_one) {return accel_n_minus_one = newAcc_minus_one;}
@@ -69,6 +69,7 @@ public:
     Point3D setR_P(Point3D newR_P) {return r_p = newR_P;}
     Point3D setV_P(Point3D newV_P) {return v_p = newV_P;}
 
+    Point3D::dataType getKineticEnergy() const {return mass * velocity.magSqr() / 2.0L;}
     Point3D getVelocity_plus_half() const {return velocity_plus_half;}
     Point3D getAccel_N_Minus_one() const {return accel_n_minus_one;}
     Point3D getPosition_plus_half() const {return position_plus_half;}
@@ -82,14 +83,15 @@ public:
     Point3D getOldVel() const {return oldVel;}
     Point3D getOldAccel() const {return oldAccel;}
     Point3D getOldJerk() const {return oldJerk;}
+
 private:
     Point3D position;
     Point3D velocity;
     Point3D accel;
     Point3D jerk;
-    long double energy;
-    long double mass;
-    long double radius;
+    Point3D::dataType energy;
+    Point3D::dataType mass;
+    Point3D::dataType radius;
     QString name;
     QColor color;
     QList<Point3D> trace;

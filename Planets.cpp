@@ -10,81 +10,6 @@
 #include <QDirIterator>
 #include <unit.h>
 
-#include <iostream>
-#include <vector>
-#include <math.h>
-#include <fstream>
-class Body {
-private:
-    double G= 1;
-    Point3D r;
-    Point3D v;
-    double mass;
-    double dt = 0.1;
-    Point3D d;
-    Point3D r1;
-    Point3D r2;
-    Point3D r3;
-    Point3D r4;
-    Point3D v1;
-    Point3D v2;
-    Point3D v3;
-    Point3D v4;
-    Point3D a1;
-    Point3D a2;
-    Point3D a3;
-    Point3D a4;
-public:
-    Body(Point3D newR, Point3D newV, double newMass) {
-        r = newR;
-        v = newV;
-        mass = newMass;
-    }
-    void update(Body b) {
-        v1 = v;
-        r1 = r;
-        d = b.r - r;
-        a1 = G * b.mass * d / (d.length() * d.magSqr());
-
-        v2 = v1 + a1 * dt * 0.5;
-        r2 = r1 + v * dt * 0.5;
-        d = b.r - r2;
-        a2 = G * b.mass * d / (d.length() * d.magSqr());
-
-        v3 = v + a2 * dt * 0.5;
-        r3 = r + v2 * dt * 0.5;
-        d = b.r - r3;
-        a3 = G * b.mass * d / (d.length() * d.magSqr());
-
-        v4 = v + a3 * dt;
-        r4 = r + v3 * dt;
-        d = b.r - r4;
-        a4 = G * b.mass * d / (d.length() * d.magSqr());
-
-        r = r + (v1 + 2 * v2 + 2 * v3 + v4) / 6.0L * dt;
-        v = v + (a1 + 2 * a2 + 2 * a3 + a4) / 6.0L * dt;
-    }
-    double get_x() {return r.x();}
-    double get_y() {return r.y();}
-};
-
-int main() {
-    Body body1(Point3D(    0,     0,     0), Point3D(     0,  -0.527046,     0), 1000);
-    Body body2(Point3D(  600,     0,     0), Point3D(     0,   1.054090,     0),  500);
-    std::ofstream pos;
-    pos.open ("Position.csv");
-    pos << "iteration,body2 x,body2 y,body1 x,body1 y" << "\n";
-    int N=100000;
-    for(int i = 0; i < N; i++) {
-        body2.update(body1);
-        body1.update(body2);
-        pos << i << "," << body2.get_x() << "," << body2.get_y() << "," << body1.get_x() << "," << body1.get_y() << "\n";
-    }
-    pos.close();
-    return 0;
-}
-
-
 Point3D::dataType Planets::w_0 = -powl(2.0 , 1/3.0)/(2.0 - powl(2, 1.0/3.0));
 Point3D::dataType Planets::w_1 = 1 / (2.0 - powl(2.0 , 1/3.0));
 Point3D::dataType Planets::yoshidaC1 = Planets::w_1/2.0;
@@ -96,11 +21,11 @@ Point3D::dataType Planets::yoshidaD3 = Planets::yoshidaD1;
 Point3D::dataType Planets::yoshidaD2 = Planets::w_0;
 QString Planets::defaultIntegrationType = "Hermite";
 
-long double generateNormalNumbers(long double mu = 0.0L, long double sigma = 1.0L)
+Point3D::dataType generateNormalNumbers(Point3D::dataType mu = 0.0L, Point3D::dataType sigma = 1.0L)
 {
 	static bool deviateAvailable=false;        //        flag
-    static long double storedDeviate;          //        deviate from previous calculation
-    long double polar, rsquared, var1, var2;
+    static Point3D::dataType storedDeviate;          //        deviate from previous calculation
+    Point3D::dataType polar, rsquared, var1, var2;
 
 	//        If no deviate has been stored, the polar Box-Muller transformation is
 	//        performed, producing two independent normally-distributed random
@@ -111,12 +36,12 @@ long double generateNormalNumbers(long double mu = 0.0L, long double sigma = 1.0
 		//        that don't fall within the unit circle
 		do
 		{
-            var1 = 2.0L*( static_cast<long double>(rand())/static_cast<long double>(RAND_MAX) ) - 1.0L;
-            var2 = 2.0L*( static_cast<long double>(rand())/static_cast<long double>(RAND_MAX) ) - 1.0L;
+            var1 = 2.0L*( static_cast<Point3D::dataType>(rand())/static_cast<Point3D::dataType>(RAND_MAX) ) - 1.0L;
+            var2 = 2.0L*( static_cast<Point3D::dataType>(rand())/static_cast<Point3D::dataType>(RAND_MAX) ) - 1.0L;
 			rsquared=var1*var1+var2*var2;
         } while ( rsquared >= 1.0L || rsquared == 0.0L);
 
-		//        calculate polar tranformation for each deviate
+        //        calculate polar transformation for each deviate
         polar = sqrtl(-2.0L*logl(rsquared)/rsquared);
 
 		//        store first deviate and set flag
@@ -136,12 +61,12 @@ long double generateNormalNumbers(long double mu = 0.0L, long double sigma = 1.0
 }
 
 template <typename T>
-inline T weightedAverage(T x, T y, long double xD, long double yD)
+inline T weightedAverage(T x, T y, Point3D::dataType xD, Point3D::dataType yD)
 {
     return (x*xD + y*yD)/(xD+yD);
 }
 
-QColor weightedAverageColor(QColor color1, QColor color2, long double mass1, long double mass2)
+QColor weightedAverageColor(QColor color1, QColor color2, Point3D::dataType mass1, Point3D::dataType mass2)
 {
 	int r1, r2, g1, g2, b1, b2, a1, a2;
 	color1.getRgb(&r1, &g1, &b1, &a1);
@@ -150,11 +75,11 @@ QColor weightedAverageColor(QColor color1, QColor color2, long double mass1, lon
                   weightedAverage(b1, b2, mass1, mass2), weightedAverage(a1, a2, mass1, mass2));
 }
 
-long double getRand(long double min, long double max, bool canBeNegative)
+Point3D::dataType getRand(Point3D::dataType min, Point3D::dataType max, bool canBeNegative)
 {
 	if (min < 0) min = 0;
-    long double range = (max - min) / RAND_MAX;
-    long double random = min + rand()*range;
+    Point3D::dataType range = (max - min) / RAND_MAX;
+    Point3D::dataType random = min + rand()*range;
 	if (! canBeNegative)
 		return random;
 	double negative = rand() - RAND_MAX/2;
@@ -172,7 +97,7 @@ Planets::Planets(QWidget *parent) : QMainWindow(parent),
 
     systemTime = 0;
     timer = new QTimer(this);                   // timer for the animation
-    timer->setInterval(5);
+    timer->setInterval(1);
     box = new QMessageBox(this);                // for debug and messages
     options = new Options();              // the options dialog
     scenarioEditor = new ScenarioDialog();
@@ -191,17 +116,12 @@ Planets::Planets(QWidget *parent) : QMainWindow(parent),
 
     loadScenarios();
 
-//    qDebug() << "writing scenarios to file resulted in" << writeScenariosV1(scenarios, "C:\\Users\\McRed\\Desktop\\TestScenarioOutput.scen");
-
-//    readScenariosV1(&scenarios, "C:\\Users\\McRed\\iCloudDrive\\QT Programming\\Planets\\DefaultScenarios.scen");
-
     ui->comboBox->clear();
     for (int i = 0; i < scenarios.length(); i++) {
         ui->comboBox->addItem(scenarios.at(i).name);
     }
     ui->comboBox->setCurrentIndex(0);
     calcAccels(0, true);
-    main();
 }
 
 void Planets::setupMenus()
@@ -332,10 +252,10 @@ void Planets::loadScenarios() {
 
     newScenario = defaultScenario();
     newScenario.name = "Solar System";
-    long double Sun[4];
-    long double Mercury[4], Venus[4], Earth[4], Mars[4];
-    long double Jupiter[4], Saturn[4], Uranus[4];
-    long double Neptune[4], Pluto[4];
+    Point3D::dataType Sun[4];
+    Point3D::dataType Mercury[4], Venus[4], Earth[4], Mars[4];
+    Point3D::dataType Jupiter[4], Saturn[4], Uranus[4];
+    Point3D::dataType Neptune[4], Pluto[4];
 
 //  planet[0] = Aphelion, planet[1] = Min orbital Velocity, planet[2] = Mass, planet[3] = Radius
     Sun[0] = 0; 	Sun[1] = 0; 	Sun[2] = 1.989E+30; 	Sun[3] = 695700;
@@ -374,7 +294,7 @@ void Planets::loadScenarios() {
     for (int i = 0; i < ui->numberOfPlanetsSpinBox->value(); i++) {
         newScenario.planets.append(Object(getRandomPoint(0, ui->averagePositionSpinBox->value()),
                               getRandomPoint(0, ui->averageSpeedSpinBox->value()),
-                              std::abs(generateNormalNumbers(static_cast<long double>(ui->averageMassSpinBox->value()), static_cast<long double>(ui->averageMassSpinBox->value())/2.0L)),
+                              std::abs(generateNormalNumbers(static_cast<Point3D::dataType>(ui->averageMassSpinBox->value()), static_cast<Point3D::dataType>(ui->averageMassSpinBox->value())/2.0L)),
                               std::abs(generateNormalNumbers(7.5L, 2)), toStringI(i + 1), Qt::yellow));
     }
     newScenario.bigG = G_real_AU_day_M_E;
@@ -596,14 +516,14 @@ void Planets::planetsCollide()
     int planet1 = -1, planet2 = -1;
     for (int i = 0; i < objects.length(); i++) {
         for (int j = i + 1; j < objects.length(); j++) {
-            if (distance(objects[i].getPosition(), objects[j].getPosition()) < qMax(objects.at(i).getRadius(), objects.at(j).getRadius())) {
+            if ((objects[i].getPosition(), objects[j].getPosition()).length() < qMax(objects.at(i).getRadius(), objects.at(j).getRadius())) {
                 planet1 = i;
                 planet2 = j;
             }
         }
     }
     if (planet1 != -1) {
-        qDebug() << objects.at(planet1).getName() + " and " + objects.at(planet2).getName() + " are colliding!";
+        QString p1Name = objects.at(planet1).getName(), p2Name = objects.at(planet2).getName();
         if (planet1 > planet2)
         {
             int temp;
@@ -625,8 +545,8 @@ void Planets::planetsCollide()
         removeObject(planet1, false);
 
         Point3D momentum = star1.getMomentum() + star2.getMomentum();
-        long double mass = star1.getMass() + star2.getMass();
-        long double radius = weightedAverage(star1.getRadius(), star2.getRadius(), star1.getMass(), star2.getMass());
+        Point3D::dataType mass = star1.getMass() + star2.getMass();
+        Point3D::dataType radius = weightedAverage(star1.getRadius(), star2.getRadius(), star1.getMass(), star2.getMass());
         QString name;
         if (star1.getMass() >= star2.getMass() * 9) name = star1.getName();
         else if (star2.getMass() >= star1.getMass() * 9) name = star2.getName();
@@ -638,10 +558,10 @@ void Planets::planetsCollide()
         trails.append(tracePoints(star1.getTrace(), star1.getTrace().size(), star1.getColor()));
         trails.append(tracePoints(star2.getTrace(), star2.getTrace().size(), star2.getColor()));
 
-        objects.insert(planet1, Object(position, momentum/mass, mass, radius, name, color));
+        objects.insert(qMin(planet1, planet2), Object(position, momentum/mass, mass, radius, name, color));
+        qDebug() << p1Name + " and " + p2Name + " have collided!";
         // recursively call planetsCollide until all collisions have been resolved
-        planetsCollide();
-        qDebug() << objects.at(planet1).getName() + " and " + objects.at(planet2).getName() + " have collided!";
+        if (planet1 < objects.length() - 1) {qDebug() << "recursively calling planetsCollide";}
     }
 }
 
@@ -683,10 +603,10 @@ void Planets::calculateSystemProperties()
 	calculateCenterOfMass();
 }
 
-long double Planets::calculateEscapeVelocity(Object *planet)
+Point3D::dataType Planets::calculateEscapeVelocity(Object *planet)
 {
     if (planet == nullptr) return 0.0L;
-    long double sum = 0.0L;
+    Point3D::dataType sum = 0.0L;
 //	debug("Calculating the escape velocity for the " + planet->getName());
 	for (int i = 0; i < objects.size(); i++)
 	{
@@ -701,24 +621,49 @@ long double Planets::calculateEscapeVelocity(Object *planet)
     return sqrtl(sqrtl(sum));
 }
 
-void Planets::calculateSystemMass()
+Point3D::dataType Planets::calculateSystemMass()
 {
 	systemMass = 0;
 	for (int i = 0; i < objects.size(); i++)
 		systemMass += objects.at(i).getMass();
+    return systemMass;
 }
 
-void Planets::calculateSystemMomentum()
+Point3D Planets::calculateSystemMomentum()
 {
     systemMomentum = Point3D(0, 0, 0);
 	for (int i = 0; i < objects.size(); i++)
 		systemMomentum += objects.at(i).getMomentum();
+    return systemMomentum;
+}
+
+Point3D::dataType Planets::calculateSystemEnergy() {
+    return calculateSystemPotentialEnergy() + calculateSystemKineticEnergy();
+}
+
+Point3D::dataType Planets::calculateSystemPotentialEnergy() {
+    Point3D::dataType systemEnergy = 0.0;
+    for (int i = 0; i < objects.length(); i++) {
+        for (int j = 0; j < objects.length(); j++) {
+            // potential energy is -G * m1 * m2 / R
+            if (i != j) systemEnergy -= G * objects.at(i).getMass() * objects.at(j).getMass()/(objects.at(i).getPosition() - objects.at(j).getPosition()).length();
+        }
+    }
+    return systemEnergy;
+}
+
+Point3D::dataType Planets::calculateSystemKineticEnergy() {
+    Point3D::dataType systemEnergy = 0.0;
+    for (int i = 0; i < objects.length(); i++) {
+        systemEnergy += objects.at(i).getKineticEnergy();
+    }
+    return systemEnergy;
 }
 
 Point3D Planets::calculateCenterOfMass()
 {
     Point3D massPosition = Point3D(0, 0, 0);
-    long double totalMass = 0;
+    Point3D::dataType totalMass = 0;
     for (int i = 0; i < objects.size(); i++) {
         massPosition += objects.at(i).getMass()*objects.at(i).getPosition();
         totalMass += objects.at(i).getMass();
@@ -726,21 +671,21 @@ Point3D Planets::calculateCenterOfMass()
     return centerOfMass = massPosition/totalMass;
 }
 
-Point3D Planets::getRandomPoint(long double minRadius, long double maxRadius)
+Point3D Planets::getRandomPoint(Point3D::dataType minRadius, Point3D::dataType maxRadius)
 {
 	if (minRadius > maxRadius)
 	{
-        long double j = minRadius;
+        Point3D::dataType j = minRadius;
 		minRadius = maxRadius;
 		maxRadius = j;
 	}
 
-    long double radius = getRand(minRadius, maxRadius, false);
-    long double x = getRand(0, radius, true);
-    long double y = getRand(0, radius, true);
+    Point3D::dataType radius = getRand(minRadius, maxRadius, false);
+    Point3D::dataType x = getRand(0, radius, true);
+    Point3D::dataType y = getRand(0, radius, true);
     int isNegative = rand()%10000 - 5000;
 	if (isNegative == 0) isNegative++;
-    long double z = sqrtl(std::abs(radius*radius - x*x - y*y)) * isNegative/std::abs(isNegative);
+    Point3D::dataType z = sqrtl(std::abs(radius*radius - x*x - y*y)) * isNegative/std::abs(isNegative);
     return Point3D(x, y, z);
 }
 
@@ -759,9 +704,9 @@ void Planets::removeObject(int index, bool isTooFar)
 		systemMomentum -= objects.at(index).getMomentum();
 	}
 
-        trails.append(tracePoints(objects[index].getTrace(),
-                                  objects[index].getTrace().size(),
-                                  objects.at(index).getColor()));
+    trails.append(tracePoints(objects[index].getTrace(),
+                              objects[index].getTrace().size(),
+                              objects.at(index).getColor()));
 
 	objects.removeAt(index);
 	ui->planetNumber->setMaximum(ui->planetNumber->maximum() - 1);
@@ -873,7 +818,7 @@ void Planets::calculateGravityForce(Plane plane)
             for (int l = 0; l < objects.size(); l++)
             {
                 if (objects.at(l).getPosition() == point) continue;
-                long double r_value = distance(objects.at(l).getPosition() - point);
+                Point3D::dataType r_value = distance(objects.at(l).getPosition() - point);
                 field += -0.025L*objects.at(l).getMass()/(r_value*r_value*r_value)*(objects.at(l).getPosition() - point);
             }
             if (options->transparentArrows())
@@ -888,7 +833,7 @@ void Planets::calculateGravityForce(Plane plane)
             else
             {
                 field *= 20000;
-                long double length = distance(field);
+                Point3D::dataType length = distance(field);
                 if (length < 1) continue; // don't bother drawing something that won't show up anyway
                 if (length > options->arrowLength())
                     field = normalize(field, options->arrowLength());
@@ -909,15 +854,15 @@ void Planets::forward()
         } else qDebug() << "Output file failed to open!";
     }
     if (fileJustOpened || firstRun) {
-        QString headerData = "Time,";
+        outputToFile <<  "Time,";
         for (int i = 0; i < objects.size(); i++)
             for (int j = 0; j < 14; j++)
-                headerData += objects.at(i).getName() + ",";
-        headerData += ",,Integration Type\n" + activeScenario.timeUnit + ",";
+                outputToFile << objects.at(i).getName() + ",";
+        outputToFile << "System Kinetic Energy,System Potential Energy,System Total Energy,,,Integration Type," << integrationType << "\n" + activeScenario.timeUnit + ",";
         for (int i = 0; i < objects.size(); i++)
-            headerData += "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Accel X,Accel Y,Accel Z,Jerk X,Jerk Y,Jerk Z,";
-        headerData += ",," + integrationType + "\n";
-        outputToFile << headerData;
+            outputToFile << "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Accel X,Accel Y,Accel Z,Jerk X,Jerk Y,Jerk Z,";
+        QString energyUnits = activeScenario.massUnit + " " + activeScenario.lengthUnit + "^2/" + activeScenario.timeUnit + "^2";
+        outputToFile << energyUnits << "," << energyUnits << "," << energyUnits << ",,,Big G," << double(G) << "\n";
 
         if (integrationType == "RK4") {
             QVector<Point3D> emptyArray;
@@ -935,17 +880,19 @@ void Planets::forward()
 
         firstRun = false;
     }
-    long double totalTime = 0.0L;
+    Point3D::dataType totalTime = 0.0L;
     if (file.isOpen()) {
-        QString dataToFile = toStringL(systemTime + totalTime) + ",";
-        for (int i = 0; i < objects.size(); i++)
-        {
-            objects[i].setVelocity(objects.at(i).getVelocity() + options->systemVelocity()*(! options->systemCentered()));
-            dataToFile += toStringO(objects.at(i), true, true);
-            objects[i].setVelocity(objects.at(i).getVelocity() - options->systemVelocity()*(! options->systemCentered()));
-        }
-        dataToFile += "\n";
-        outputToFile << dataToFile;
+        outputToFile << toStringL(systemTime + totalTime) + ",";
+        for (int i = 0; i < objects.size(); i++) {outputToFile << toStringO(objects.at(i), true, true);}
+        outputToFile << double(calculateSystemKineticEnergy()) << "," << double(calculateSystemPotentialEnergy()) << "," << double(calculateSystemEnergy());
+        if (linesPrinted == 0) {outputToFile << ",,,,value,log_2 of value";}
+        else if (linesPrinted == 1) {outputToFile << ",,,dt," << double(activeScenario.dt) << "," << double(log2(activeScenario.dt));}
+        else if (linesPrinted == 2) {outputToFile << ",,,iterations per datapoint," << double(activeScenario.iterationsPerDataPoint) << "," << log2(activeScenario.iterationsPerDataPoint);}
+        else if (linesPrinted == 3) {outputToFile << ",,,length unit," << activeScenario.lengthUnit << "," << Unit::getLongName(activeScenario.lengthUnit);}
+        else if (linesPrinted == 4) {outputToFile << ",,,time unit," << activeScenario.timeUnit << "," << Unit::getLongName(activeScenario.timeUnit);}
+        else if (linesPrinted == 5) {outputToFile << ",,,mass unit," << activeScenario.massUnit << "," << Unit::getLongName(activeScenario.massUnit);}
+        outputToFile << "\n";
+        linesPrinted += 1;
     }
     for (uint i = 0; i < activeScenario.iterationsPerDataPoint; i++) {
         totalTime += dt;
@@ -959,35 +906,32 @@ void Planets::forward()
     }
     if (integrationType == "RK4") {calcAccels();}
 
-    if (options->displayTrace())
-    {
-        for (int i = 0; i < objects.size(); i++)
+    try {
+        if (options->displayTrace())
         {
-            objects[i].addToTrace(objects.at(i).getPosition());
-            while (objects[i].getTrace().size() > options->traceNumber())
-                objects[i].eraseFirstTrace();
+/*            for (int i = 0; i < objects.size(); i++)
+            {
+                objects[i].addToTrace(objects.at(i).getPosition());
+                while (objects[i].getTrace().size() > options->traceNumber())
+                    objects[i].eraseFirstTrace();
+            }*/
+            for (int i = 0; i < trails.size(); i++)
+                trails[i].setNumberOfOldPoints(trails.at(i).getOldNumber() + 1);
+            for (int i = 0; i < trails.size(); i++)
+                if (trails.at(i).size() == 0)
+                    trails.removeAt(i--);
+            for (int i = 0; i < trails.size(); i++)
+                while ((trails.at(i).size() + trails.at(i).getOldNumber()) > options->traceNumber())
+                    trails[i].removeLastPoint();
         }
-        for (int i = 0; i < trails.size(); i++)
-            trails[i].setNumberOfOldPoints(trails.at(i).getOldNumber() + 1);
-        for (int i = 0; i < trails.size(); i++)
-            if (trails.at(i).size() == 0)
-                trails.removeAt(i--);
-        for (int i = 0; i < trails.size(); i++)
-            while ((trails.at(i).size() + trails.at(i).getOldNumber()) > options->traceNumber())
-                trails[i].removeLastPoint();
+    } catch (...) {
+        qDebug() << "tracing doesn't work well!";
     }
 
     systemTime += totalTime;
 
     // if any of the trigger conditions have hit, stop the simulation and close the file
-    if (((activeScenario.endTime != -1) && (systemTime >= activeScenario.endTime)) || objects.size() == 1) {
-        outputToFile << "\n\n";
-        outputToFile << ",value,log_2 of value\n";
-        outputToFile << "dt," << double(activeScenario.dt) << "," << double(log2(activeScenario.dt)) << "\n";
-        outputToFile << "iterations per datapoint," << double(activeScenario.iterationsPerDataPoint) << "," << log2(activeScenario.iterationsPerDataPoint) << "\n";
-        outputToFile << "length unit," << activeScenario.lengthUnit << "," << Unit::getLongName(activeScenario.lengthUnit) << "\n";
-        outputToFile << "time unit," << activeScenario.timeUnit << "," << Unit::getLongName(activeScenario.timeUnit) << "\n";
-        outputToFile << "mass unit," << activeScenario.massUnit << "," << Unit::getLongName(activeScenario.massUnit) << "\n";
+    if (((activeScenario.endTime != -1) && (systemTime >= activeScenario.endTime)) || (objects.length() == 1)) {
         file.close();
         timer->stop();
     }
@@ -995,7 +939,7 @@ void Planets::forward()
 }
 
 void Planets::calcAccels(int arguments, bool calcJerk) {
-    long double r2, r3;
+    Point3D::dataType r2, r3;
     Point3D r_i_k;
     Point3D v_i_k;
     // if arguments is zero, that means use the normal position
@@ -1220,12 +1164,12 @@ void Planets::status()
 
 void Planets::update()
 {
-    viewerAngle = Point3D(static_cast<long double>(ui->viewerAngleXSpinBox->value()),
-                          static_cast<long double>(ui->viewerAngleYSpinBox->value()),
-                          static_cast<long double>(ui->viewerAngleZSpinBox->value()));
-    viewerPosition = Point3D(static_cast<long double>(ui->viewerPositionXSpinBox->value()),
-                             static_cast<long double>(ui->viewerPositionYSpinBox->value()),
-                             static_cast<long double>(ui->viewerPositionZSpinBox->value()));
+    viewerAngle = Point3D(static_cast<Point3D::dataType>(ui->viewerAngleXSpinBox->value()),
+                          static_cast<Point3D::dataType>(ui->viewerAngleYSpinBox->value()),
+                          static_cast<Point3D::dataType>(ui->viewerAngleZSpinBox->value()));
+    viewerPosition = Point3D(static_cast<Point3D::dataType>(ui->viewerPositionXSpinBox->value()),
+                             static_cast<Point3D::dataType>(ui->viewerPositionYSpinBox->value()),
+                             static_cast<Point3D::dataType>(ui->viewerPositionZSpinBox->value()));
     viewerPlane = Plane(Point3D(0,0,0), Point3D(1,0,0), Point3D(0,1,0));
     viewerPlane.setBasisLength(1);
     setText();
@@ -1260,6 +1204,8 @@ void Planets::reset()
     removedObjects.setVelocity(Point3D(0, 0, 0));
     activeScenario = defaultScenario();
     firstRun = true;
+    linesPrinted = 0;
+    if (file.isOpen()) file.close();
 
     for (int i = 0; i < scenarios.length(); i++ ) {
         if (scenarios.at(i).name == ui->comboBox->currentText() && scenarioIsValid(scenarios.at(i))) {
@@ -1368,9 +1314,9 @@ void Planets::planet()
     if (!loadingPlanets)
     {
         objects.replace(ui->planetComboBox->currentIndex(),
-                        Object(Point3D(static_cast<long double>(ui->positionX->value()), static_cast<long double>(ui->positionY->value()), static_cast<long double>(ui->positionZ->value())),
-                               Point3D(static_cast<long double>(ui->velocityX->value()), static_cast<long double>(ui->velocityY->value()), static_cast<long double>(ui->velocityZ->value())),
-                               static_cast<long double>(ui->massSpin->value()), 20, ui->nameLine->text(),
+                        Object(Point3D(static_cast<Point3D::dataType>(ui->positionX->value()), static_cast<Point3D::dataType>(ui->positionY->value()), static_cast<Point3D::dataType>(ui->positionZ->value())),
+                               Point3D(static_cast<Point3D::dataType>(ui->velocityX->value()), static_cast<Point3D::dataType>(ui->velocityY->value()), static_cast<Point3D::dataType>(ui->velocityZ->value())),
+                               static_cast<Point3D::dataType>(ui->massSpin->value()), 20, ui->nameLine->text(),
                                objects.at(ui->planetComboBox->currentIndex()).getColor()));
         update();
     }

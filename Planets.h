@@ -91,7 +91,7 @@ private:
     QList <Point3D> gravPoints;  // the list of the points that gravity is displayed at
     QList <Point3D> gravLength;  // the list of lengths of gravity at the points
     QList <QColor> gravColor;    // the color that the gravity should be
-    long double systemTime;      // the time that the system has been running
+    Point3D::dataType systemTime;      // the time that the system has been running
     QString data;                // this string holds the data that will be exported to a CSV file for analysis
     Object removedObjects;       // this holds properties of the objects that got too far from the system
     QTimer * timer;              // timer for the animation
@@ -100,23 +100,23 @@ private:
     QList<Object> objects;       // the list of the orbiting objects
     QList<tracePoints> trails;   // this is the list of the old trails that deleted objects leave behind
     Point3D systemMomentum;      // this is the system momentum. use it to find systemVelocity
-    long double systemMass;      // this is all of the mass in the entire system
+    Point3D::dataType systemMass;      // this is all of the mass in the entire system
     static const int time = 25;  // the time in milliseconds between screen updates
     QString integrationType;     // integration type
     bool integrationInitialize;  // initialize integration
 
-    static constexpr long double G_fake = 0.025L;
-    long double G;
+    static constexpr Point3D::dataType G_fake = 0.025L;
+    Point3D::dataType G;
 
 //  use these constants when using the solar system realistic model
-    static constexpr long double G_real_mks = 6.67e-11L;         // meters^3/(kilograms*seconds^2)
-    static constexpr long double G_real_kmks = 6.67e-20L;         // kilometers^3/(kilograms*seconds^2)
-    static constexpr long double G_real_AU_day_M_E = 8.88744E-10;   // AU^3/(earth mass * days^2)      Distance - AU, time - days, mass - Earth mass
-    long double dt = 0.000976562500;
-    long double dt2 = dt*dt;
-    long double dt3 = dt*dt2;
+    static constexpr Point3D::dataType G_real_mks = 6.67e-11L;         // meters^3/(kilograms*seconds^2)
+    static constexpr Point3D::dataType G_real_kmks = 6.67e-20L;         // kilometers^3/(kilograms*seconds^2)
+    static constexpr Point3D::dataType G_real_AU_day_M_E = 8.88744E-10;   // AU^3/(earth mass * days^2)      Distance - AU, time - days, mass - Earth mass
+    Point3D::dataType dt = 0.000976562500;
+    Point3D::dataType dt2 = dt*dt;
+    Point3D::dataType dt3 = dt*dt2;
 
-    Point3D getRandomPoint(long double minRadius = 0, long double maxRadius = 100);
+    Point3D getRandomPoint(Point3D::dataType minRadius = 0, Point3D::dataType maxRadius = 100);
 
     void calcAccels(int arguments = 0, bool calcJerks = true);
     void Euler();
@@ -142,14 +142,18 @@ private:
     static QString defaultIntegrationType;
 
     void calculateSystemProperties();
-    void calculateSystemMass();
-    void calculateSystemMomentum();
+    Point3D::dataType calculateSystemMass();
+    Point3D calculateSystemMomentum();
+    Point3D::dataType calculateSystemEnergy();
+    Point3D::dataType calculateSystemPotentialEnergy();
+    Point3D::dataType calculateSystemKineticEnergy();
+    long unsigned int linesPrinted;
 
     QString filename;
     QFile file;
     QTextStream outputToFile;
 
-    long double calculateEscapeVelocity(Object * planet);
+    Point3D::dataType calculateEscapeVelocity(Object * planet);
     void setNumberOfPlanets(int number);
     void planetsCollide();
     Point3D calculateCenterOfMass();
@@ -157,8 +161,7 @@ private:
     QString toStringO(Object planet, bool showEverything = false, bool CSVFormat = false);
     QString toStringP(Point3D point, bool CSVFormat = false) const;
 
-    long double getTheta(Point3D point) {return static_cast<long double>(atan2(double(point.y()), double(point.x())));}
-    void forwardNext();
+    Point3D::dataType getTheta(Point3D point) {return static_cast<Point3D::dataType>(atan2(double(point.y()), double(point.x())));}
     void removeObject(int index, bool isTooFar = false);
 
     QVector<scenario> scenarios;
