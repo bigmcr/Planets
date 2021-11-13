@@ -12,6 +12,7 @@ private:
     dataType xCoord, yCoord, zCoord;
 public:
     Point3D(dataType x = 0, dataType y = 0, dataType z = 0) {xCoord = x; yCoord = y; zCoord = z;}
+    Point3D(const Point3D &newPoint) {xCoord = newPoint.x(); yCoord = newPoint.y(); zCoord = newPoint.z();}
     bool isNull() const {return ((xCoord == 0) && (yCoord == 0) && (zCoord == 0));}
     dataType manhattanLength() const {return fabsl(xCoord) + fabsl(yCoord) + fabsl(zCoord);}
     dataType length() const {return sqrtl(magSqr()); }
@@ -74,6 +75,7 @@ public:
         zCoord *= factor;
         return *this;
     }
+    const Point3D operator=(const Point3D p2) {xCoord = p2.x(); yCoord = p2.y(); zCoord = p2.z(); return *this;}
     bool operator!=(const Point3D p2) const {return ((xCoord != p2.x()) || (yCoord != p2.y()) || (zCoord != p2.z()));}
     bool operator==(const Point3D p2) const {return ((xCoord == p2.x()) && (yCoord == p2.y()) && (zCoord == p2.z()));}
 
@@ -86,6 +88,11 @@ const Point3D operator*(Point3D::dataType factor, const Point3D & p);
 const Point3D operator+(const Point3D & p1, const Point3D & p2);
 const Point3D operator-(const Point3D & p1, const Point3D & p2);
 const Point3D operator/(const Point3D & p, Point3D::dataType divisor);
+QVector<Point3D> add(QVector<Point3D> vect1, QVector<Point3D> vect2);
+QVector<Point3D> sub(QVector<Point3D> vect1, QVector<Point3D> vect2);
+QVector<Point3D> operator*(QVector<Point3D> vect, Point3D::dataType factor);
+QVector<Point3D> operator*(Point3D::dataType factor, QVector<Point3D> vect);
+QVector<Point3D> operator/(QVector<Point3D> vect, Point3D::dataType factor);
 const Point3D operator-(Point3D & p);
 const Point3D operator%(const Point3D p1, const Point3D p2);
 const Point3D cross(const Point3D p1, const Point3D p2);

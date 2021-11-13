@@ -1,5 +1,6 @@
 #include <Point3D.h>
 #include <QString>
+#include <QVector>
 
 const Point3D operator*(const Point3D & p, Point3D::dataType factor)
 {
@@ -81,4 +82,42 @@ Point3D::dataType distance(const Point3D point1, const Point3D point2)
 Point3D::dataType distance(const Point3D point1)
 {
     return point1.length();
+}
+
+QVector<Point3D> add(QVector<Point3D> vect1, QVector<Point3D> vect2) {
+    if (vect1.length() != vect2.length()) throw std::length_error("QVectors must have the same length to be added");
+    QVector<Point3D> returnMe;
+    for (int i = 0; i < vect1.length(); i++) {
+        returnMe.append(vect1[i] + vect2[i]);
+    }
+    return returnMe;
+}
+
+QVector<Point3D> sub(QVector<Point3D> vect1, QVector<Point3D> vect2) {
+    if (vect1.length() != vect2.length()) throw std::length_error("QVectors must have the same length to be subtracted");
+    QVector<Point3D> returnMe;
+    for (int i = 0; i < vect1.length(); i++) {
+        returnMe.append(vect1[i] - vect2[i]);
+    }
+    return returnMe;
+}
+
+QVector<Point3D> operator*(QVector<Point3D> vect, Point3D::dataType factor) {
+    QVector<Point3D> returnMe;
+    for (int i = 0; i < vect.length(); i++) {
+        returnMe.append(vect[i] * factor);
+    }
+    return returnMe;
+}
+
+QVector<Point3D> operator*(Point3D::dataType factor, QVector<Point3D> vect) {
+    return vect * factor;
+}
+
+QVector<Point3D> operator/(QVector<Point3D> vect, Point3D::dataType factor) {
+    QVector<Point3D> returnMe;
+    for (int i = 0; i < vect.length(); i++) {
+        returnMe.append(vect[i] / factor);
+    }
+    return returnMe;
 }
