@@ -27,6 +27,7 @@ SOURCES += main.cpp\
     unit.cpp
 
 HEADERS  += Planets.h \
+    Butcher_Tableau.h \
     Matrix.h \
     Object.h \
     Scenario.h \

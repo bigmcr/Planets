@@ -19,7 +19,7 @@ Point3D::dataType Planets::yoshidaC3 = Planets::yoshidaC2;
 Point3D::dataType Planets::yoshidaD1 = Planets::w_1;
 Point3D::dataType Planets::yoshidaD3 = Planets::yoshidaD1;
 Point3D::dataType Planets::yoshidaD2 = Planets::w_0;
-QString Planets::defaultIntegrationType = "Hermite";
+QString Planets::defaultIntegrationType = "RKF";
 
 Point3D::dataType generateNormalNumbers(Point3D::dataType mu = 0.0L, Point3D::dataType sigma = 1.0L)
 {
@@ -91,7 +91,6 @@ Planets::Planets(QWidget *parent) : QMainWindow(parent),
     ui(new Ui::Planets)
 {
     ui->setupUi(this);
-//    setupMenus();
     box = new QMessageBox(this);
     loadingPlanets = false;
 
@@ -105,9 +104,11 @@ Planets::Planets(QWidget *parent) : QMainWindow(parent),
     mouseIsPanning = false;
     lastPos = QPoint(0,0);
     integrationType = defaultIntegrationType;
+    positionErrorTol = velocityErrorTol = 1;
 
     filename = "C:\\Users\\McRed\\Desktop\\Motion Integration.csv";//QFileDialog::getSaveFileName(this, "Save File Name", "Motion Integration.csv", "CSV files (.csv);;Zip files (.zip, *.7z)", 0, 0); // getting the filename (full path)
     file.setFileName(filename);
+    fileDebug.setFileName("C:\\Users\\McRed\\Desktop\\Motion Integration Debug.csv");
 
     connectEverything();
 
@@ -475,23 +476,12 @@ void Planets::setText()
     ui->textBrowser->setText(message);
 }
 
-void Planets::debug(QString message, QString subMessage)
-{
-	box->setText(message);
-	box->setDetailedText(subMessage);
-	box->exec();
-}
-
 void Planets::planetsChangeNumber()
 {
     if (ui->planetComboBox->currentText() == "Free Form")
     {
         stopTimer();
         ui->textBrowser->setText("This is a test.\nThere are " + toStringI(objects.size()) + " objects in the system.");
-        if (ui->planetNumber->value() > objects.size())
-        {
-            debug("Adding " + toStringI(ui->planetNumber->value() - objects.size()) + " objects to the system.");
-        }
     }
     return;
 }
@@ -854,35 +844,24 @@ void Planets::forward()
         } else qDebug() << "Output file failed to open!";
     }
     if (fileJustOpened || firstRun) {
-        outputToFile <<  "Time,";
+        outputToFile <<  "Time,Delta Time,Position Error,Position Error Tolerance,";
         for (int i = 0; i < objects.size(); i++)
             for (int j = 0; j < 14; j++)
                 outputToFile << objects.at(i).getName() + ",";
-        outputToFile << "System Kinetic Energy,System Potential Energy,System Total Energy,,,Integration Type," << integrationType << "\n" + activeScenario.timeUnit + ",";
+        outputToFile << "System Kinetic Energy,System Potential Energy,System Total Energy,,,Integration Type," << integrationType << "\n";
+        outputToFile << activeScenario.timeUnit + "," + activeScenario.timeUnit + "," + activeScenario.lengthUnit + "," + activeScenario.lengthUnit + ",";
         for (int i = 0; i < objects.size(); i++)
             outputToFile << "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Accel X,Accel Y,Accel Z,Jerk X,Jerk Y,Jerk Z,";
         QString energyUnits = activeScenario.massUnit + " " + activeScenario.lengthUnit + "^2/" + activeScenario.timeUnit + "^2";
         outputToFile << energyUnits << "," << energyUnits << "," << energyUnits << ",,,Big G," << double(G) << "\n";
-
-        if (integrationType == "RK4") {
-            QVector<Point3D> emptyArray;
-            emptyArray.resize(objects.length());
-
-            RK4_k_r.clear();
-            while (RK4_k_r.length() != 4) {RK4_k_r.append(emptyArray);}
-
-            RK4_k_v.clear();
-            while (RK4_k_v.length() != 4) {RK4_k_v.append(emptyArray);}
-
-            RK4_k_a.clear();
-            while (RK4_k_a.length() != 4) {RK4_k_a.append(emptyArray);}
-        }
 
         firstRun = false;
     }
     Point3D::dataType totalTime = 0.0L;
     if (file.isOpen()) {
         outputToFile << toStringL(systemTime + totalTime) + ",";
+        outputToFile << toStringL(dt) + ",";
+        outputToFile << toStringL(positionError) + "," + toStringL(positionErrorTol) + ",";
         for (int i = 0; i < objects.size(); i++) {outputToFile << toStringO(objects.at(i), true, true);}
         outputToFile << double(calculateSystemKineticEnergy()) << "," << double(calculateSystemPotentialEnergy()) << "," << double(calculateSystemEnergy());
         if (linesPrinted == 0) {outputToFile << ",,,,value,log_2 of value";}
@@ -894,6 +873,7 @@ void Planets::forward()
         outputToFile << "\n";
         linesPrinted += 1;
     }
+    positionError = velocityError = 0;
     for (uint i = 0; i < activeScenario.iterationsPerDataPoint; i++) {
         totalTime += dt;
         if (integrationType == "Hermite") {Hermite();}
@@ -902,31 +882,34 @@ void Planets::forward()
         else if (integrationType == "Yoshida") {Yoshida();}
         else if (integrationType == "Euler") {Euler();}
         else if (integrationType == "RK4") {RK4();}
+        else if (integrationType == "RKF") {RKF();}
         planetsCollide();
-    }
-    if (integrationType == "RK4") {calcAccels();}
-
-    try {
-        if (options->displayTrace())
-        {
-/*            for (int i = 0; i < objects.size(); i++)
-            {
-                objects[i].addToTrace(objects.at(i).getPosition());
-                while (objects[i].getTrace().size() > options->traceNumber())
-                    objects[i].eraseFirstTrace();
-            }*/
-            for (int i = 0; i < trails.size(); i++)
-                trails[i].setNumberOfOldPoints(trails.at(i).getOldNumber() + 1);
-            for (int i = 0; i < trails.size(); i++)
-                if (trails.at(i).size() == 0)
-                    trails.removeAt(i--);
-            for (int i = 0; i < trails.size(); i++)
-                while ((trails.at(i).size() + trails.at(i).getOldNumber()) > options->traceNumber())
-                    trails[i].removeLastPoint();
+        if (fileJustOpened && integrationType == "RKF") {
+            positionErrorTol = qMax(positionError, powl(2.0, -20));
+            velocityErrorTol = velocityError;
+            fileJustOpened = false;
         }
-    } catch (...) {
-        qDebug() << "tracing doesn't work well!";
     }
+    if (integrationType.at(0) == "R") {calcAccels();}
+
+    if (options->displayTrace())
+    {
+        for (int i = 0; i < objects.size(); i++)
+        {
+            objects[i].addToTrace(objects.at(i).getPosition());
+            while (objects[i].getTrace().size() > options->traceNumber())
+                objects[i].eraseFirstTrace();
+        }
+        for (int i = 0; i < trails.size(); i++)
+            trails[i].setNumberOfOldPoints(trails.at(i).getOldNumber() + 1);
+        for (int i = 0; i < trails.size(); i++)
+            if (trails.at(i).size() == 0)
+                trails.removeAt(i--);
+        for (int i = 0; i < trails.size(); i++)
+            while ((trails.at(i).size() + trails.at(i).getOldNumber()) > options->traceNumber())
+                trails[i].removeLastPoint();
+    }
+
 
     systemTime += totalTime;
 
@@ -938,60 +921,96 @@ void Planets::forward()
     update();
 }
 
-void Planets::calcAccels(int arguments, bool calcJerk) {
-    Point3D::dataType r2, r3;
-    Point3D r_i_k;
-    Point3D v_i_k;
-    // if arguments is zero, that means use the normal position
-    if (arguments == 0) {
-        for (int i = 0; i < objects.length(); i++) {
-            Point3D accelCurrent = Point3D();
-            Point3D jerkCurrent = Point3D();
-            for (int k = 0; k < objects.size(); k++)
-            {
-                if (k == i || (objects.at(k).getMass() == 0.0L)) continue;
-                r_i_k = objects.at(i).getPosition() - objects.at(k).getPosition();
-                v_i_k = objects.at(i).getVelocity() - objects.at(k).getVelocity();
-                r2 = r_i_k.magSqr();
-                r3 = r_i_k.mag() * r2;
-                accelCurrent += 0 - G * objects.at(k).getMass() / r2 * r_i_k.normal();
-                if (calcJerk) {
-                    jerkCurrent += 0 - G * objects.at(k).getMass() / r3 * (v_i_k - 3 * dot(r_i_k, v_i_k)*r_i_k / r2);
-                }
+QVector<Point3D> Planets::calcAccelerations(QVector<Point3D> positions, QVector<Point3D::dataType> masses) {
+    // calculate the accelerations of the given point masses at the given positions due to gravity.
+    QVector<Point3D> accels;
+    if (positions.length() != masses.length()) return accels;
+    Point3D d;
+    for (int i = 0; i < positions.length(); i++) {
+        Point3D tempAccel;
+        for (int j = 0; j < positions.length(); j++) {
+            if (i != j) {
+                d = positions.at(j) - positions.at(i);
+                tempAccel += G * masses.at(j) * d / (d.length() * d.magSqr());
             }
-            objects[i].setAccel(accelCurrent);
-            if (calcJerk) objects[i].setJerk(jerkCurrent);
         }
-    } else if (arguments == 5) {
-        for (int i = 0; i < objects.length(); i++) {
-            Point3D accelCurrent;
-            Point3D jerkCurrent;
-            for (int k = 0; k < objects.size(); k++)
-            {
-                if (k == i || (objects.at(k).getMass() == 0.0L)) continue;
-                r_i_k = objects.at(i).getR_P() - objects.at(k).getR_P();
-                v_i_k = objects.at(i).getV_P() - objects.at(k).getV_P();
-                r2 = r_i_k.magSqr();
-                r3 = r_i_k.mag() * r2;
-                accelCurrent += 0 - G * objects.at(k).getMass() / r2 * r_i_k.normal();
-                jerkCurrent  += 0 - G * objects.at(k).getMass() / r3 * (v_i_k - 3 * dot(r_i_k, v_i_k)*r_i_k / r2);
+        accels.append(tempAccel);
+    }
+    return accels;
+}
+
+QVector<Point3D> Planets::calcFVector(Point3D::dataType t, QVector<Point3D> yVector, QVector<Point3D::dataType> masses) {
+    t++;
+    int N_bodies = yVector.length() / 2;
+    QVector<Point3D> solved_vector; solved_vector.fill(Point3D(), yVector.length());
+    for (int i = 0; i < N_bodies; i++) {
+        int ioffset = i * 2;
+        for (int j = 0; j < N_bodies; j++) {
+            int joffset = j * 2;
+            solved_vector[ioffset] = yVector[ioffset+1];
+            if (i != j) {
+                Point3D d = yVector[ioffset] - yVector[joffset];
+                solved_vector[ioffset+1] += calcAccel(d, masses[j]);
+//                qDebug() << "N_bodies" << N_bodies << "i" << i << "i*2" << i*2 << "j" << j;
             }
-            objects[i].setAccel(accelCurrent);
-            if (calcJerk) objects[i].setJerk(jerkCurrent);
-        }
-        // if arguments is non-zero, use the x_i position, where i is the argument
-    } else {
-        for (int i = 0; i < objects.length(); i++) {
-            Point3D accelCurrent;
-            for (int k = 0; k < objects.size(); k++)
-            {
-                if (k == i || (objects.at(k).getMass() == 0.0L)) continue;
-                r_i_k = objects.at(i).getX_i(arguments) - objects.at(k).getX_i(arguments);
-                accelCurrent += 0 - G * objects.at(k).getMass() / r_i_k.magSqr() * r_i_k.normal();
-            }
-            objects[i].setAccel(accelCurrent);
         }
     }
+    return solved_vector;
+}
+
+void Planets::calcAccels(int arguments, bool calcJerks) {
+    Point3D r_i_k;
+    Point3D v_i_k;
+    Point3D accelCurrent;
+    Point3D jerkCurrent;
+    QVector<Point3D> tempList;
+    Point3D::dataType mass;
+    // if arguments is zero, that means use the normal position
+    for (int i = 0; i < objects.length(); i++) {
+        accelCurrent = Point3D();
+        jerkCurrent = Point3D();
+        for (int k = 0; k < objects.size(); k++)
+        {
+            if (k == i || (objects.at(k).getMass() == 0.0L)) continue;
+            if (arguments == 0) {
+                r_i_k = objects.at(i).getPosition() - objects.at(k).getPosition();
+                v_i_k = objects.at(i).getVelocity() - objects.at(k).getVelocity();
+            } else if (arguments == 5) {
+                r_i_k = objects.at(i).getR_P() - objects.at(k).getR_P();
+                v_i_k = objects.at(i).getV_P() - objects.at(k).getV_P();
+            } else {
+                r_i_k = objects.at(i).getX_i(arguments) - objects.at(k).getX_i(arguments);
+                v_i_k = objects.at(i).getVelocity() - objects.at(k).getVelocity();
+            }
+            mass = objects.at(k).getMass();
+            if (!calcJerks) {
+                accelCurrent += calcAccel(r_i_k, mass);
+            } else {
+                tempList = calcJerk(r_i_k, v_i_k, mass);
+                accelCurrent += tempList.at(0);
+                jerkCurrent += tempList.at(1);
+            }
+        }
+        objects[i].setAccel(accelCurrent);
+        objects[i].setJerk(jerkCurrent);
+    }
+}
+
+Point3D Planets::calcAccel(Point3D distance, Point3D::dataType mass) {
+    Point3D::dataType r = distance.length();
+    return - G * mass * distance / (r*r*r);
+}
+
+QVector<Point3D> Planets::calcJerk(Point3D distance, Point3D velocity, Point3D::dataType mass) {
+    Point3D::dataType r = distance.length();
+    Point3D::dataType r2 = distance.magSqr();
+    Point3D::dataType r3 = r2*r;
+    QVector<Point3D> returnMe;
+    // acceleration due to another object
+    returnMe.append(distance * - G * mass / (r*r*r));
+    // jerk due to another object
+    returnMe.append(-G * mass / r3 * (velocity - 3 * dot(distance, velocity)*distance / r2));
+    return returnMe;
 }
 
 void Planets::Euler() {
@@ -1093,59 +1112,115 @@ void Planets::Hermite() {
 }
 
 void Planets::RK4() {
-    Point3D d;
+    Point3D::dataType t = 0;
+    QVector<Point3D> startYVector;
+    QVector<Point3D::dataType> masses;
     for (int i = 0; i < objects.length(); i++) {
-        RK4_k_r[0][i] = objects.at(i).getPosition();
-        RK4_k_v[0][i] = objects.at(i).getVelocity();
-        RK4_k_a[0][i] = Point3D();
-        for (int j = 0; j < objects.length(); j++) {
-            if (i != j) {
-                d = objects.at(j).getPosition() - RK4_k_r[0][i];
-                RK4_k_a[0][i] += G * objects.at(j).getMass() * d / (d.length() * d.magSqr());
-            }
+        startYVector.append(objects.at(i).getPosition());
+        startYVector.append(objects.at(i).getVelocity());
+        masses.append(objects.at(i).getMass());
+    }
+
+//    QVector<Point3D> k1 = dt * calcFVector(t +      0,     startYVector                , masses);
+//    QVector<Point3D> k2 = dt * calcFVector(t + 0.5*dt, add(startYVector, dt * 0.5 * k1), masses);
+//    QVector<Point3D> k3 = dt * calcFVector(t + 0.5*dt, add(startYVector, dt * 0.5 * k2), masses);
+//    QVector<Point3D> k4 = dt * calcFVector(t +     dt, add(startYVector, dt * 1.0 * k2), masses);
+
+    QVector<Point3D> k1 = dt * calcFVector(t           ,                        startYVector,                                  masses);
+    QVector<Point3D> k2 = dt * calcFVector(t + dt * 0.5, add(                   startYVector, 0.5 * k1),                       masses);
+    QVector<Point3D> k3 = dt * calcFVector(t + dt * 0.5, add(                   startYVector           , 0.5 * k2),            masses);
+    QVector<Point3D> k4 = dt * calcFVector(t + dt * 1.0, add(                   startYVector                      , 0.5 * k3), masses);
+
+    QVector<Point3D> FVector = add(add(add(k1, 2 * k2), 2 * k3), k4)/6.0;
+    QVector<Point3D> y_new = add(startYVector, FVector);
+
+    for (int i = 0; i < objects.length(); i++) {
+        objects[i].setPosition(y_new[i * 2 + 0]);
+        objects[i].setVelocity(y_new[i * 2 + 1]);
+        objects[i].setAccel(FVector[i * 2 + 1]);
+    }
+}
+
+void Planets::documentVector(QVector<Point3D> vect) {
+    for (int i = 0; i < vect.length(); i++) {
+        outputToFileDebug << double(vect.at(i).x()) << "," << double(vect.at(i).y()) << "," << double(vect.at(i).z()) << ",";
+    }
+}
+
+void Planets::RKF() {
+    Point3D::dataType t = 0;
+    QVector<Point3D> startYVector;
+    QVector<Point3D::dataType> masses;
+    for (int i = 0; i < objects.length(); i++) {
+        startYVector.append(objects.at(i).getPosition());
+        startYVector.append(objects.at(i).getVelocity());
+        masses.append(objects.at(i).getMass());
+    }
+    QVector<Point3D::dataType> bFactors, bPrimeFactors;
+    bFactors.append(16/135.0);      bPrimeFactors.append(25/216.0);
+    bFactors.append(6656/12825.0);  bPrimeFactors.append(1408/2565.0);
+    bFactors.append(28561/56430.0); bPrimeFactors.append(2197/4104.0);
+    bFactors.append(-9/50.0);       bPrimeFactors.append(-1/5.0);
+    bFactors.append(2/55.0);        bPrimeFactors.append(0);
+    QVector<Point3D::dataType> aList, cList, chList, ctList;
+    QVector<QVector<Point3D::dataType>> bList;
+    aList.append(0);            aList.append(2/9.0);    aList.append(1/3.0);    aList.append(3/4.0);        aList.append(1.0);      aList.append(5/6.0);
+    cList.append(1/9.0);        cList.append(0);        cList.append(9/20.0);   cList.append(16/45.0);      cList.append(1/12.0);   cList.append(0);
+    chList.append(47/450.0);    chList.append(0);       chList.append(12/25.0); chList.append(32/225.0);    chList.append(1/30.0);  chList.append(6/25.0);
+    ctList.append(-1/150.0);    ctList.append(0);       ctList.append(3/100.0); ctList.append(-16/75.0);    ctList.append(-1/20.0); ctList.append(6/25.0);
+    QVector<Point3D::dataType> bListRow;
+    bListRow.clear(); bListRow.append(0);           bListRow.append(0);             bListRow.append(0);         bListRow.append(0);         bListRow.append(0);         bList.append(bListRow);
+    bListRow.clear(); bListRow.append(2/9.0);       bListRow.append(0);             bListRow.append(0);         bListRow.append(0);         bListRow.append(0);         bList.append(bListRow);
+    bListRow.clear(); bListRow.append(1/12.0);      bListRow.append(1/4.0);         bListRow.append(0);         bListRow.append(0);         bListRow.append(0);         bList.append(bListRow);
+    bListRow.clear(); bListRow.append(69/128.0);    bListRow.append(-243/128.0);    bListRow.append(135/64.0);  bListRow.append(0);         bListRow.append(0);         bList.append(bListRow);
+    bListRow.clear(); bListRow.append(-17/12.0);    bListRow.append(27/4.0);        bListRow.append(-27/5.0);   bListRow.append(16/15.0);   bListRow.append(0);         bList.append(bListRow);
+    bListRow.clear(); bListRow.append(65/432.0);    bListRow.append(-5/16.0);       bListRow.append(13/16.0);   bListRow.append(4/27.0);    bListRow.append(5/144.0);   bList.append(bListRow);
+
+    QVector<Point3D> k1;
+    QVector<Point3D> k2;
+    QVector<Point3D> k3;
+    QVector<Point3D> k4;
+    QVector<Point3D> k5;
+    QVector<Point3D> k6;
+    k1 = dt * calcFVector(t + dt * aList.at(0),                        startYVector,                                                                                                                              masses);
+    k2 = dt * calcFVector(t + dt * aList.at(1), add(                   startYVector, bList.at(1).at(0) * k1),                                                                                                     masses);
+    k3 = dt * calcFVector(t + dt * aList.at(2), add(add(               startYVector, bList.at(1).at(1) * k1), bList.at(2).at(1) * k2),                                                                            masses);
+    k4 = dt * calcFVector(t + dt * aList.at(3), add(add(add(           startYVector, bList.at(1).at(2) * k1), bList.at(2).at(2) * k2), bList.at(3).at(2) * k3),                                                   masses);
+    k5 = dt * calcFVector(t + dt * aList.at(4), add(add(add(add(       startYVector, bList.at(1).at(3) * k1), bList.at(2).at(3) * k2), bList.at(3).at(3) * k3), bList.at(4).at(3) * k4),                          masses);
+    k6 = dt * calcFVector(t + dt * aList.at(5), add(add(add(add(add(   startYVector, bList.at(1).at(4) * k1), bList.at(2).at(4) * k2), bList.at(3).at(4) * k3), bList.at(4).at(4) * k4), bList.at(5).at(4) * k1), masses);
+    QVector<Point3D> FVector = add(add(add(add(add(chList.at(0) * k1, chList.at(1) * k2), chList.at(2) * k3), chList.at(3) * k4), chList.at(4) * k5), chList.at(5) * k6);
+    positionError = 0;
+    velocityError = 0;
+    Point3D::dataType temp = 0.0;
+    for (int i = 0; i < k1.length(); i++) {
+        temp = fabsl(ctList.at(0) * k1.at(i).length() +
+                     ctList.at(1) * k2.at(i).length() +
+                     ctList.at(2) * k3.at(i).length() +
+                     ctList.at(3) * k4.at(i).length() +
+                     ctList.at(4) * k5.at(i).length() +
+                     ctList.at(5) * k6.at(i).length());
+        if (i % 2) positionError += temp;
+        else velocityError += temp;
+    }
+    if (positionErrorTol != 1.0) {
+        Point3D::dataType hNewPos = 0.9 * dt * powl(positionError/positionErrorTol, 0.2);
+        if (positionError > positionErrorTol) {
+            qDebug() << "error too high position error" << double(positionError) << "tolerance" << double(positionErrorTol) << "current dt" << double(dt) << "new dt" << double(hNewPos);
+            dt = qMax(dt/2.0, powl(2, -20));
+            RKF();
+        } else if (positionError < positionErrorTol * 0.25) {
+            dt = qMin(dt * 2.0, powl(2, 1));
+            qDebug() << "error too low position error" << double(positionError) << "tolerance" << double(positionErrorTol) << "current dt" << double(dt) << "new dt" << double(hNewPos);
         }
     }
 
+    QVector<Point3D> y_new = add(startYVector, FVector);
     for (int i = 0; i < objects.length(); i++) {
-        RK4_k_v[1][i] = RK4_k_v[0][i] + RK4_k_a[0][i] * dt * 0.5;
-        RK4_k_r[1][i] = RK4_k_r[0][i] + RK4_k_v[0][i] * dt * 0.5;
-        RK4_k_a[1][i] = Point3D();
-        for (int j = 0; j < objects.length(); j++) {
-            if (i != j) {
-                d = objects.at(j).getPosition() - RK4_k_r[1][i];
-                RK4_k_a[1][i] += G * objects.at(j).getMass() * d / (d.length() * d.magSqr());
-            }
-        }
+        objects[i].setPosition(y_new[i * 2 + 0]);
+        objects[i].setVelocity(y_new[i * 2 + 1]);
+        objects[i].setAccel(FVector[i * 2 + 1]);
     }
-
-    for (int i = 0; i < objects.length(); i++) {
-        RK4_k_v[2][i] = RK4_k_v[0][i] + RK4_k_a[1][i] * dt * 0.5;
-        RK4_k_r[2][i] = RK4_k_r[0][i] + RK4_k_v[1][i] * dt * 0.5;
-        RK4_k_a[2][i] = Point3D();
-        for (int j = 0; j < objects.length(); j++) {
-            if (i != j) {
-                d = objects.at(j).getPosition() - RK4_k_r[2][i];
-                RK4_k_a[2][i] += G * objects.at(j).getMass() * d / (d.length() * d.magSqr());
-            }
-        }
-    }
-
-    for (int i = 0; i < objects.length(); i++) {
-        RK4_k_v[3][i] = RK4_k_v[0][i] + RK4_k_a[2][i] * dt;
-        RK4_k_r[3][i] = RK4_k_r[0][i] + RK4_k_v[2][i] * dt;
-        RK4_k_a[3][i] = Point3D();
-        for (int j = 0; j < objects.length(); j++) {
-            if (i != j) {
-                d = objects.at(j).getPosition() - RK4_k_r[3][i];
-                RK4_k_a[3][i] += G * objects.at(j).getMass() * d / (d.length() * d.magSqr());
-            }
-        }
-    }
-
-    for (int i = 0; i < objects.length(); i++) {
-        objects[i].setPosition(objects.at(i).getPosition() + (RK4_k_v[0][i] + 2.0 * RK4_k_v[1][i] + 2.0 * RK4_k_v[2][i] + RK4_k_v[3][i]) / 6.0L * dt);
-        objects[i].setVelocity(objects.at(i).getVelocity() + (RK4_k_a[0][i] + 2.0 * RK4_k_a[1][i] + 2.0 * RK4_k_a[2][i] + RK4_k_a[3][i]) / 6.0L * dt);
-    }
+    return;
 }
 
 void Planets::status()
@@ -1159,7 +1234,7 @@ void Planets::status()
         subMessage += toStringO(objects.at(i), true) + "\n";
 	}
 	ui->textBrowser->setText(data);
-        debug(message, subMessage);
+        qDebug() << message << subMessage;
 }
 
 void Planets::update()
@@ -1206,6 +1281,7 @@ void Planets::reset()
     firstRun = true;
     linesPrinted = 0;
     if (file.isOpen()) file.close();
+    if (fileDebug.isOpen()) fileDebug.close();
 
     for (int i = 0; i < scenarios.length(); i++ ) {
         if (scenarios.at(i).name == ui->comboBox->currentText() && scenarioIsValid(scenarios.at(i))) {

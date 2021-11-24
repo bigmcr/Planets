@@ -14,6 +14,7 @@
 #include <Scenario.h>
 #include <QFile>
 #include <scenariodialog.h>
+#include <Butcher_Tableau.h>
 
 namespace Ui {
     class Planets;
@@ -81,29 +82,30 @@ private:
     Options * options;
     ScenarioDialog * scenarioEditor;
 
-    void debug(QString, QString = "");
-
     Point3D viewerPosition;
     Point3D viewerAngle;
     QPoint lastPos;
     Plane viewerPlane;
     QPoint zoomPoint;
-    QList <Point3D> gravPoints;  // the list of the points that gravity is displayed at
-    QList <Point3D> gravLength;  // the list of lengths of gravity at the points
-    QList <QColor> gravColor;    // the color that the gravity should be
-    Point3D::dataType systemTime;      // the time that the system has been running
-    QString data;                // this string holds the data that will be exported to a CSV file for analysis
-    Object removedObjects;       // this holds properties of the objects that got too far from the system
-    QTimer * timer;              // timer for the animation
-    QMessageBox * box;           // for debug and messages
-    Point3D centerOfMass;        // the current center of mass of the system
-    QList<Object> objects;       // the list of the orbiting objects
-    QList<tracePoints> trails;   // this is the list of the old trails that deleted objects leave behind
-    Point3D systemMomentum;      // this is the system momentum. use it to find systemVelocity
-    Point3D::dataType systemMass;      // this is all of the mass in the entire system
-    static const int time = 25;  // the time in milliseconds between screen updates
-    QString integrationType;     // integration type
-    bool integrationInitialize;  // initialize integration
+    QList <Point3D> gravPoints;         // the list of the points that gravity is displayed at
+    QList <Point3D> gravLength;         // the list of lengths of gravity at the points
+    QList <QColor> gravColor;           // the color that the gravity should be
+    Point3D::dataType systemTime;       // the time that the system has been running
+    Point3D::dataType positionError;    // current position error, per body
+    Point3D::dataType velocityError;    // current velocity error, per body
+    Point3D::dataType positionErrorTol; // tolerable position error, per body
+    Point3D::dataType velocityErrorTol; // tolerable velocity error, per body
+    QString data;                       // this string holds the data that will be exported to a CSV file for analysis
+    Object removedObjects;              // this holds properties of the objects that got too far from the system
+    QTimer * timer;                     // timer for the animation
+    QMessageBox * box;                  // for debug and messages
+    Point3D centerOfMass;               // the current center of mass of the system
+    QList<Object> objects;              // the list of the orbiting objects
+    QList<tracePoints> trails;          // this is the list of the old trails that deleted objects leave behind
+    Point3D systemMomentum;             // this is the system momentum. use it to find systemVelocity
+    Point3D::dataType systemMass;       // this is all of the mass in the entire system
+    QString integrationType;            // integration type
+    bool integrationInitialize;         // initialize integration
 
     static constexpr Point3D::dataType G_fake = 0.025L;
     Point3D::dataType G;
@@ -119,12 +121,16 @@ private:
     Point3D getRandomPoint(Point3D::dataType minRadius = 0, Point3D::dataType maxRadius = 100);
 
     void calcAccels(int arguments = 0, bool calcJerks = true);
+    Point3D calcAccel(Point3D distance, Point3D::dataType mass);
+    QVector<Point3D> calcJerk(Point3D distance, Point3D velocity, Point3D::dataType mass);
     void Euler();
     void EulerCromber();
     void VelocityVerlet();
     void Yoshida();
     void Hermite();
     void RK4();
+    void RKF();
+    void documentVector(QVector<Point3D> vect);
     static Point3D::dataType w_0;
     static Point3D::dataType w_1;
     static Point3D::dataType yoshidaC1;
@@ -134,9 +140,11 @@ private:
     static Point3D::dataType yoshidaD1;
     static Point3D::dataType yoshidaD3;
     static Point3D::dataType yoshidaD2;
-    QVector<QVector<Point3D>> RK4_k_r;
-    QVector<QVector<Point3D>> RK4_k_v;
-    QVector<QVector<Point3D>> RK4_k_a;
+//    butcherTableau RK4Tableau;
+//    butcherTableau RKF1Tableau;
+
+    QVector<Point3D> calcAccelerations(QVector<Point3D> positions, QVector<Point3D::dataType> masses);
+    QVector<Point3D> calcFVector(Point3D::dataType t, QVector<Point3D> yVector, QVector<Point3D::dataType> masses);
     bool firstRun;
 
     static QString defaultIntegrationType;
@@ -150,8 +158,8 @@ private:
     long unsigned int linesPrinted;
 
     QString filename;
-    QFile file;
-    QTextStream outputToFile;
+    QFile file, fileDebug;
+    QTextStream outputToFile, outputToFileDebug;
 
     Point3D::dataType calculateEscapeVelocity(Object * planet);
     void setNumberOfPlanets(int number);

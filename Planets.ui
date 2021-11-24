@@ -696,6 +696,16 @@
               <string>RK4</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>RK4New</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>RKF</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="0" column="1">

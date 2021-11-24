@@ -111,10 +111,4 @@ Matrix operator*(double factor, const Matrix &m1);
 Matrix operator-(const Matrix &m1, const Matrix &m2);
 Matrix operator+(const Matrix &m1, const Matrix &m2);
 
-#ifndef MATRIX_CPP
-#define MATRIX_CPP
-#include "matrix.cpp"
-#endif // MATRIX_CPP
-
-
 #endif // MATRIX_H
