@@ -2,7 +2,7 @@ Scenario v0.1
 name 4 Star Ballet
 bigG 8.88744e-10
 dt -10
-iterationsPerDataPoint 1024
+iterationsPerDataPoint 10
 endTime 4000
 lengthUnit au
 massUnit m_e

@@ -45,7 +45,7 @@ bool writeScenariosV1(QVector<scenario> scens, QString filename) {
             outputToFile << "name " << scens.at(i).name << "\n";
             outputToFile << "bigG " << static_cast<double>(scens.at(i).bigG) << "\n";
             outputToFile << "dt " << static_cast<double>(log2(scens.at(i).dt)) << "\n";
-            outputToFile << "iterationsPerDataPoint " << scens.at(i).iterationsPerDataPoint << "\n";
+            outputToFile << "iterationsPerDataPoint " << static_cast<double>(log2(scens.at(i).iterationsPerDataPoint)) << "\n";
             outputToFile << "endTime " << static_cast<double>(scens.at(i).endTime) << "\n";
             outputToFile << "lengthUnit " << scens.at(i).lengthUnit << "\n";
             outputToFile << "massUnit " << scens.at(i).massUnit << "\n";
@@ -97,7 +97,7 @@ bool readScenariosV1(QVector<scenario> * scenarios, QString filename) {
 
             temp = inputFromFile.readLine();
             if (temp.indexOf("iterationsPerDataPoint ") != 0) {errorMessage = "iterationsPerDataPoint incorrect!"; errorLine = temp;}
-            else newScen.iterationsPerDataPoint = temp.midRef(23).toInt();
+            else newScen.iterationsPerDataPoint = powl(2.0, temp.midRef(23).toDouble());
 
             temp = inputFromFile.readLine();
             if (temp.indexOf("endTime ") != 0) {errorMessage = "endTime incorrect!"; errorLine = temp;}

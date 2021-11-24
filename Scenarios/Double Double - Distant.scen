@@ -2,7 +2,7 @@ Scenario v0.1
 name Double Double - Distant
 bigG 8.88744e-10
 dt -7
-iterationsPerDataPoint 128
+iterationsPerDataPoint 7
 endTime 32768
 lengthUnit au
 massUnit m_e
