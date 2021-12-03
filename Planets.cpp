@@ -506,7 +506,7 @@ void Planets::planetsCollide()
     int planet1 = -1, planet2 = -1;
     for (int i = 0; i < objects.length(); i++) {
         for (int j = i + 1; j < objects.length(); j++) {
-            if ((objects[i].getPosition(), objects[j].getPosition()).length() < qMax(objects.at(i).getRadius(), objects.at(j).getRadius())) {
+            if ((objects[i].getPosition() - objects[j].getPosition()).length() < objects.at(i).getRadius() + objects.at(j).getRadius()) {
                 planet1 = i;
                 planet2 = j;
             }
@@ -844,12 +844,13 @@ void Planets::forward()
         } else qDebug() << "Output file failed to open!";
     }
     if (fileJustOpened || firstRun) {
-        outputToFile <<  "Time,Delta Time,Position Error,Position Error Tolerance,";
+        outputToFile <<  "Time,Delta Time,Position Error,Position Error Tolerance,Velocity Error,Velocity Error Tolerance,";
         for (int i = 0; i < objects.size(); i++)
             for (int j = 0; j < 14; j++)
                 outputToFile << objects.at(i).getName() + ",";
         outputToFile << "System Kinetic Energy,System Potential Energy,System Total Energy,,,Integration Type," << integrationType << "\n";
         outputToFile << activeScenario.timeUnit + "," + activeScenario.timeUnit + "," + activeScenario.lengthUnit + "," + activeScenario.lengthUnit + ",";
+        outputToFile << activeScenario.lengthUnit + "/" + activeScenario.timeUnit + "," + activeScenario.lengthUnit + "/" + activeScenario.timeUnit + ",";
         for (int i = 0; i < objects.size(); i++)
             outputToFile << "Name,Mass,Position X,Position Y,Position Z,Velocity X,Velocity Y,Velocity Z,Accel X,Accel Y,Accel Z,Jerk X,Jerk Y,Jerk Z,";
         QString energyUnits = activeScenario.massUnit + " " + activeScenario.lengthUnit + "^2/" + activeScenario.timeUnit + "^2";
@@ -862,6 +863,7 @@ void Planets::forward()
         outputToFile << toStringL(systemTime + totalTime) + ",";
         outputToFile << toStringL(dt) + ",";
         outputToFile << toStringL(positionError) + "," + toStringL(positionErrorTol) + ",";
+        outputToFile << toStringL(velocityError) + "," + toStringL(velocityErrorTol) + ",";
         for (int i = 0; i < objects.size(); i++) {outputToFile << toStringO(objects.at(i), true, true);}
         outputToFile << double(calculateSystemKineticEnergy()) << "," << double(calculateSystemPotentialEnergy()) << "," << double(calculateSystemEnergy());
         if (linesPrinted == 0) {outputToFile << ",,,,value,log_2 of value";}
@@ -885,7 +887,7 @@ void Planets::forward()
         else if (integrationType == "RKF") {RKF();}
         planetsCollide();
         if (fileJustOpened && integrationType == "RKF") {
-            positionErrorTol = qMax(positionError, powl(2.0, -20));
+            positionErrorTol = qMax(positionError, powl(2.0, -20)) / 1000.0;
             velocityErrorTol = velocityError;
             fileJustOpened = false;
         }
@@ -1209,7 +1211,7 @@ void Planets::RKF() {
             dt = qMax(dt/2.0, powl(2, -20));
             RKF();
         } else if (positionError < positionErrorTol * 0.25) {
-            dt = qMin(dt * 2.0, powl(2, 1));
+            dt = qMin(dt * 2.0, powl(2, 5));
             qDebug() << "error too low position error" << double(positionError) << "tolerance" << double(positionErrorTol) << "current dt" << double(dt) << "new dt" << double(hNewPos);
         }
     }
@@ -1266,7 +1268,6 @@ void Planets::reset()
     zoomPoint = QPoint(0,0);                    // the point that the mouse wheel will zoom into
     systemTime = 0;                             // how long the system has been running
     options->setTrace(true);                    // whether or not to draw the previous positions of the planets
-    options->setTraceNumber(1000);              // the number of previous positions to record
     options->setSystemCentered(true);           // whether or not the screen stays centered on the system
     systemMass = 100;                           // this is all of the mass in the entire system
     centerOfMass = Point3D(0, 0, 0);            // the current center of mass of the system
