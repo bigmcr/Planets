@@ -10,21 +10,21 @@ timeUnit day
 planet
     position 10, 30, 0
     velocity 0, 0, 0
-    mass 3e+06
-    radius 0.006149059
+    mass 3e+05
+    radius 0.012298118
     name Sun 3
     color 0, 255, 0
 planet
     position -20, -10, 0
     velocity 0, 0, 0
-    mass 4e+06
-    radius 0.006767916
+    mass 4e+05
+    radius 0.013535832
     name Sun 4
     color 255, 0, 0
 planet
     position 10, -10, 0
     velocity 0, 0, 0
-    mass 5e+06
-    radius 0.007290516
+    mass 5e+05
+    radius 0.014581032
     name Sun 5
     color 0, 0, 255
